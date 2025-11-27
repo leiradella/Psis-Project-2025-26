@@ -7,7 +7,7 @@ int main() {
     config_init(&cfg);
 
 
-    if (!config_read_file(&cfg, "universe_config.conf")) {
+    if (config_read_file(&cfg, "./universe_config.conf") == CONFIG_FALSE) {
         config_destroy(&cfg);
         return 1;
     }
@@ -16,7 +16,6 @@ int main() {
     UniverseConfig universe_config;
     read_config_file(&cfg, &universe_config);
 
-    
     //close config file
     config_destroy(&cfg);
 
