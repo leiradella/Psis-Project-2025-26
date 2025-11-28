@@ -10,12 +10,6 @@ void CheckEvents(int* running) {
     }
 }
 
-void UpdateUniverse() {
-    // Placeholder for universe update logic
-}
-
-void Draw(SDL_Renderer* renderer) {    
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-    // Placeholder for drawing logic
+void UpdateUniverse(Planet* planets) {
+    (void)planets; //currently unused
 }

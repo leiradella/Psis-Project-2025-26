@@ -6,7 +6,7 @@ ZMQFLAGS = -lzmq
 PROTOCFLAGS = -lprotobuf-c
 
 TARGET = universe-simulator
-SRCS = universe-simulator.c universe-data.c physics-rules.c
+SRCS = universe-simulator.c universe-data.c physics-rules.c display.c
 
 all: $(TARGET)
 

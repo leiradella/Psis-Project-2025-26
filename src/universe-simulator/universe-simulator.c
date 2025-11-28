@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <libconfig.h>
 #include <SDL2/SDL.h>
 
@@ -6,14 +8,6 @@
 #include "display.h"
 
 int main() {
-
-    //create a universe config struct with the parameters
-    UniverseConfig universe_config;
-
-    //get the params with the GetUniverseParameters function (errors are handled inside the function)
-    if (GetUniverseParameters("universe_config.conf", &universe_config) != 0) {
-        return 1;
-    }
 
     //Initalize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -51,12 +45,21 @@ int main() {
     //main loop flag
     int running = 1;
 
+    int seed = rand(); //initialize seed with a random value
+
+    //create the universal initial state here using universe_config parameters
+    Planet* planets = CreateInitialUniverseState("universe_config.conf", seed);
+    int n_planets = GetNumberPlanets("universe_config.conf");
+
     //main loop: check events, update universe state, draw universe
     while (running) {
         CheckEvents(&running);
-        UpdateUniverse();
-        Draw(renderer);
+        UpdateUniverse(planets);
+        Draw(renderer, planets, n_planets);
     }
+
+    //free allocated universe state memory
+    free(planets);
 
     //destroy SDL variables and quit SDL
     SDL_DestroyRenderer(renderer);
