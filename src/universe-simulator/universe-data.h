@@ -12,6 +12,14 @@ typedef struct UniverseConfig {
     int trash_ship_capacity;
 } UniverseConfig;
 
+//planet structure
+typedef struct Planet {
+    char name;
+    int x;
+    int y;
+    int trash_amount;
+} Planet;
+
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config
 //this function is the only public function related to universe data reading
