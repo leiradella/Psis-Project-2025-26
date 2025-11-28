@@ -3,6 +3,7 @@
 
 #include <libconfig.h>
 
+//unvierse configuration structure
 typedef struct UniverseConfig {
     int universe_size;
     int n_planets;
@@ -11,7 +12,8 @@ typedef struct UniverseConfig {
     int trash_ship_capacity;
 } UniverseConfig;
 
-int read_config_file(config_t *cfg, UniverseConfig *universe_config);
+int GetUniverseParameters(char* config_name, UniverseConfig* universe_config);
+int _ReadUniverseData(config_t *cfg, UniverseConfig *universe_config);
 
 
 
