@@ -3,6 +3,7 @@
 
 #include "universe-data.h"
 #include "physics-rules.h"
+#include "display.h"
 
 int main() {
 
@@ -50,7 +51,7 @@ int main() {
     //main loop flag
     int running = 1;
 
-    //main loop
+    //main loop: check events, update universe state, draw universe
     while (running) {
         CheckEvents(&running);
         UpdateUniverse();
@@ -62,5 +63,6 @@ int main() {
     SDL_DestroyWindow(window);
     SDL_Quit();
 
+    printf("Universe Simulator exited successfully.\n");
     return 0;
 }

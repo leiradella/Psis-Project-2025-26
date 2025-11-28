@@ -9,7 +9,4 @@ void CheckEvents(int* running);
 //universe update function
 void UpdateUniverse();
 
-//draw function
-void Draw(SDL_Renderer* renderer);
-
 #endif

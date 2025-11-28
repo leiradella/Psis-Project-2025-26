@@ -3,11 +3,10 @@
 
 void CheckEvents(int* running) {
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            printf("Quit event received. Exiting...\n");
-            *running = 0;
-        }
+    SDL_WaitEvent(&event);
+    if (event.type == SDL_QUIT) {
+        printf("Quit event received. Exiting...\n");
+        *running = 0;
     }
 }
 
@@ -16,5 +15,7 @@ void UpdateUniverse() {
 }
 
 void Draw(SDL_Renderer* renderer) {    
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
     // Placeholder for drawing logic
 }
