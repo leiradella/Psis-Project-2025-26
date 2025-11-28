@@ -25,7 +25,7 @@ typedef struct Planet {
 #define PLANET_MASS 10
 #define PLANET_RADIUS 20.0f
 #define INITIAL_TRASH_AMOUNT 0
-#define MIN_PLANET_DISTANCE 40
+#define MIN_PLANET_DISTANCE 80.0f
 
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config

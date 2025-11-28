@@ -69,12 +69,14 @@ void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int see
     //loop flags
     int positioned = 0;
     int attempts = 0;
-    const int max_attempts = 10 * n_planets; //max attempts to position all planets
+    const int max_attempts = 1000 * n_planets; //max attempts to position all planets
 
     //current planet index
     int current_planet = 0;
 
     while (!positioned && attempts < max_attempts) {
+        attempts++;
+        
         //get random coordinates within bounds (PLANET_RADIUS from edges)
         float range = universe_size - 2 * PLANET_RADIUS;
         x = PLANET_RADIUS + ((float)(rand_r((unsigned int*)&seed) % (int)range));
@@ -83,13 +85,8 @@ void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int see
         //valid flag
         int valid = 1;
 
-        //check if the position is valid
-        for (int i = 0; i < n_planets; i++) {
-            if (planets[i].x == -100.0f && planets[i].y == -100.0f) {
-                //this planet is not placed yet, skip it
-                continue;
-            }
-
+        //check if the position is valid (only check already-placed planets)
+        for (int i = 0; i < current_planet; i++) {
             float dx = planets[i].x - x;
             float dy = planets[i].y - y;
             float dist_sq = dx * dx + dy * dy;

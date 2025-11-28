@@ -3,6 +3,7 @@
 
 #include <libconfig.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "universe-data.h"
 #include "physics-rules.h"
@@ -16,6 +17,13 @@ int main() {
     //Initalize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    //Initialize SDL_ttf
+    if (TTF_Init() != 0) {
+        printf("TTF_Init Error: %s\n", TTF_GetError());
+        SDL_Quit();
         return 1;
     }
 
@@ -68,6 +76,7 @@ int main() {
     //destroy SDL variables and quit SDL
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     SDL_Quit();
 
     printf("Universe Simulator exited successfully.\n");
