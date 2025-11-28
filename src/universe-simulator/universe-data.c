@@ -129,9 +129,6 @@ Planet *CreateInitialUniverseState(const char* config_name, int seed) {
     //create a vector with all planets
     Planet* planets = malloc(universe_config.n_planets * sizeof(Planet));
 
-    for (int i = 0; i < universe_config.n_planets; i++) {
-    }
-
     //initialize radius and mass constants, names, positions, and trash amounts
     for (int i = 0; i < universe_config.n_planets; i++) {
         planets[i].mass = PLANET_MASS;

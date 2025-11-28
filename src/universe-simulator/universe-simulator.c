@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 #include <libconfig.h>
 #include <SDL2/SDL.h>
@@ -8,6 +9,9 @@
 #include "display.h"
 
 int main() {
+
+    //seed random number generator with current time
+    srand(time(NULL));
 
     //Initalize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
