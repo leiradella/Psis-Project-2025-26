@@ -55,5 +55,10 @@ dkms.conf
 *.dwo
 
 
+#compiled programs
+src/universe-simulator/universe-simulator
+src/trash_ship_simulator/universe-client
+src/trash_ship_simulator/universe-server
+
 #vscode
 .vscode/
