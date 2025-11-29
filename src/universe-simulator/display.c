@@ -23,7 +23,7 @@ void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets) {
     //planets will be drawn as just circles with their names on the top right
     for (int i = 0; i < n_planets; i++) {
         //draw planet i as a filled circle (blue)
-        filledCircleRGBA(renderer, (int)planets[i].x, (int)planets[i].y, (int)planets[i].radius, 0, 0, 255, 255);
+        filledCircleRGBA(renderer, (int)planets[i].position.x, (int)planets[i].position.y, (int)planets[i].radius, 0, 0, 255, 255);
 
         //draw planet name at top-right of planet
         //name is a single char + the amount of trash inside the planet
@@ -45,8 +45,8 @@ void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets) {
         }
 
         SDL_Rect textRect;
-        textRect.x = (int)(planets[i].x + planets[i].radius);
-        textRect.y = (int)(planets[i].y - planets[i].radius);
+        textRect.x = (int)(planets[i].position.x + planets[i].radius);
+        textRect.y = (int)(planets[i].position.y - planets[i].radius);
         textRect.w = textSurface->w * 2;  
         textRect.h = textSurface->h * 2;
         SDL_FreeSurface(textSurface);

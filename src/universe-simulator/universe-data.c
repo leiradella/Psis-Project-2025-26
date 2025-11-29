@@ -87,8 +87,8 @@ void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int see
 
         //check if the position is valid (only check already-placed planets)
         for (int i = 0; i < current_planet; i++) {
-            float dx = planets[i].x - x;
-            float dy = planets[i].y - y;
+            float dx = planets[i].position.x - x;
+            float dy = planets[i].position.y - y;
             float dist_sq = dx * dx + dy * dy;
 
             if (dist_sq < MIN_PLANET_DISTANCE * MIN_PLANET_DISTANCE) {
@@ -100,8 +100,8 @@ void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int see
 
         if (valid) {
             //position is valid, assign it to the planet
-            planets[current_planet].x = x;
-            planets[current_planet].y = y;
+            planets[current_planet].position.x = x;
+            planets[current_planet].position.y = y;
             current_planet++;
         }
 
@@ -134,8 +134,8 @@ Planet *CreateInitialUniverseState(const char* config_name, int seed) {
         planets[i].name = 'A' + i; //assign names like A B C...
 
         //initialize positions with invalid values
-        planets[i].x = -100.0f;
-        planets[i].y = -100.0f;
+        planets[i].position.x = -100.0f;
+        planets[i].position.y = -100.0f;
     }
     
     //position all planets
@@ -145,8 +145,8 @@ Planet *CreateInitialUniverseState(const char* config_name, int seed) {
     for (int i = 0; i < universe_config.n_planets; i++){
         printf("Planet %c: Position (%.2f, %.2f), Mass %d, Radius %.2f, Trash Amount %d\n",
                planets[i].name,
-               planets[i].x,
-               planets[i].y,
+               planets[i].position.x,
+               planets[i].position.y,
                planets[i].mass,
                planets[i].radius,
                planets[i].trash_amount);

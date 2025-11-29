@@ -12,11 +12,18 @@ typedef struct UniverseConfig {
     int trash_ship_capacity;
 } UniverseConfig;
 
+//universe objects and other structures
+
+//position structure
+typedef struct Position {
+    float x;
+    float y;
+} Position;
+
 //planet structure
 typedef struct Planet {
     char name;
-    float x;
-    float y;
+    Position position;
     int mass;
     float radius;
     int trash_amount;
