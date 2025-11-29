@@ -141,17 +141,6 @@ Planet *CreateInitialUniverseState(const char* config_name, int seed) {
     //position all planets
     _PositionPlanets(planets, universe_config.n_planets, universe_config.universe_size, seed);
 
-    //debug print all planets
-    for (int i = 0; i < universe_config.n_planets; i++){
-        printf("Planet %c: Position (%.2f, %.2f), Mass %d, Radius %.2f, Trash Amount %d\n",
-               planets[i].name,
-               planets[i].position.x,
-               planets[i].position.y,
-               planets[i].mass,
-               planets[i].radius,
-               planets[i].trash_amount);
-    }
-
     return planets;
 }
 
