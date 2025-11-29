@@ -20,6 +20,12 @@ typedef struct Position {
     float y;
 } Position;
 
+//vector structure (used for velocities)
+typedef struct Vector {
+    float amplitude;
+    float angle;
+} Vector;
+
 //planet structure
 typedef struct Planet {
     char name;
@@ -28,6 +34,14 @@ typedef struct Planet {
     float radius;
     int trash_amount;
 } Planet;
+
+//trash structure
+typedef struct Trash {
+    Position position;
+    Vector velocity;
+    int mass;
+    float radius;
+} Trash;
 
 #define PLANET_MASS 10
 #define PLANET_RADIUS 20.0f
