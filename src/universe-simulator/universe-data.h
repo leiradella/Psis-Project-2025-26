@@ -12,14 +12,6 @@ typedef struct UniverseConfig {
     int trash_ship_capacity;
 } UniverseConfig;
 
-//game state structure (so that we dont pass too many parameters on the main loop)
-typedef struct GameState {
-    Planet* planets;
-    int n_planets;
-    Trash *trashes;
-    int n_trashes;
-} GameState;
-
 //universe objects and other structures
 
 //position structure
@@ -50,6 +42,14 @@ typedef struct Trash {
     int mass;
     float radius;
 } Trash;
+
+//game state structure (so that we dont pass too many parameters on the main loop)
+typedef struct GameState {
+    Planet* planets;
+    int n_planets;
+    Trash *trashes;
+    int n_trashes;
+} GameState;
 
 #define PLANET_MASS 10
 #define PLANET_RADIUS 20.0f
