@@ -13,6 +13,10 @@ int main() {
 
     //seed random number generator with current time
     srand(time(NULL));
+    int seed = rand(); //initialize seed with a random value
+
+    //create the universal initial state here using universe_config parameters
+    GameState* game_state = CreateInitialUniverseState("universe_config.conf", seed);
 
     //Initalize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -26,14 +30,15 @@ int main() {
         SDL_Quit();
         return 1;
     }
+    
 
     //create SDL_window variable
     SDL_Window *window = SDL_CreateWindow(
         "Universe Simulator", 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
-        800, 
-        600, 
+        game_state->universe_size, 
+        game_state->universe_size, 
         SDL_WINDOW_SHOWN
     );
 
@@ -57,10 +62,7 @@ int main() {
     //main loop flag
     int running = 1;
 
-    int seed = rand(); //initialize seed with a random value
 
-    //create the universal initial state here using universe_config parameters
-    GameState* game_state = CreateInitialUniverseState("universe_config.conf", seed);
 
 
     //main loop: check events, update universe state, draw universe
