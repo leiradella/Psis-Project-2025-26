@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <zmq.h>
 
 int main(int argc, char *argv[])
 {
@@ -11,25 +12,37 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    SDL_Window *win = SDL_CreateWindow("ShipClient",
+    SDL_Window *pWin = SDL_CreateWindow("ShipClient",
                                         SDL_WINDOWPOS_CENTERED, 
                                         SDL_WINDOWPOS_CENTERED,
                                         1000, 1000, 0);
 
-    if( win == NULL){
+    if(!pWin){
         printf("error initializing SDL: %s\n", SDL_GetError());
         SDL_Quit();
         return -1;
     }
 
-    /*
     //Create ZMQ_Context
     void *context = zmq_ctx_new();
+
+    if(!context){
+        printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
+        SDL_DestroyWindow(pWin);
+        SDL_Quit();
+        return -1;
+    }
 
     //Socket to send messages to
     void *sender = zmq_socket(context, ZMQ_PUSH);
     zmq_connect(sender, "tcp://localhost:5558");
-    */
+
+    if(!sender){
+        printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
+        zmq_ctx_destroy(context);
+        SDL_DestroyWindow(pWin);
+        SDL_Quit();
+    }
 
     int close = 0;
     while(!close)
@@ -79,7 +92,13 @@ int main(int argc, char *argv[])
         
     }
 
-    SDL_DestroyWindow(win);
+    zmq_close(sender);
+
+    zmq_ctx_destroy(context);
+
+    SDL_DestroyWindow(pWin);
 
     SDL_Quit();
+
+    return 0;
 }
