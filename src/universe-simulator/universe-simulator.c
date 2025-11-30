@@ -18,6 +18,11 @@ int main() {
     //create the universal initial state here using universe_config parameters
     GameState* game_state = CreateInitialUniverseState("universe_config.conf", seed);
 
+    if (game_state == NULL) {
+        printf("Failed to create initial universe state. Exiting...\n");
+        return 1;
+    }
+
     //Initalize SDL
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -61,9 +66,6 @@ int main() {
 
     //main loop flag
     int running = 1;
-
-
-
 
     //main loop: check events, update universe state, draw universe
     while (running) {

@@ -224,6 +224,12 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     //get the params with the config file
     _GetUniverseParameters(config_name, &universe_config);
 
+    if (universe_config.n_planets <= 0 || universe_config.max_trash <= 0 || 
+        universe_config.starting_trash < 0 || universe_config.starting_trash > universe_config.max_trash) {
+        printf("Invalid universe configuration parameters.\n");
+        return NULL;
+    }
+
     //now we can use universe_config to create the initial state of the universe
     //the results are semi deterministic based on the seed value
 
@@ -242,6 +248,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     game_state->trashes = trashes;
     game_state->n_trashes = universe_config.starting_trash;
     game_state->max_trash = universe_config.max_trash;
+    game_state->is_game_over = 0;
 
     return game_state;
 }

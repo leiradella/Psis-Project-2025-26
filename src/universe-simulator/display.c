@@ -61,6 +61,46 @@ void _DrawTrash(SDL_Renderer* renderer, GameState* game_state) {
     }
 }
 
+void _DrawGameOver(SDL_Renderer* renderer, GameState* game_state) {
+
+    if(game_state->is_game_over == 0) {
+        return;
+    }
+
+    //load font for game over text
+    TTF_Font* font = TTF_OpenFont("arial.ttf", 48);
+    if (font == NULL) {
+        printf("Failed to load font: %s\n", TTF_GetError());
+        exit(1);
+    }
+
+    //create "Game Over" text surface
+    SDL_Color textColor = {255, 0, 0, 255}; //red color
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, "GAME OVER", textColor);
+    if (textSurface == NULL) {
+        printf("Failed to create text surface: %s\n", TTF_GetError());
+        exit(1);
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    if (textTexture == NULL) {
+        printf("Failed to create text texture: %s\n", SDL_GetError());
+        SDL_FreeSurface(textSurface);
+        exit(1);
+    }
+
+    SDL_Rect textRect;
+    textRect.x = (game_state->universe_size - textSurface->w) / 2;
+    textRect.y = (game_state->universe_size - textSurface->h) / 2;
+    textRect.w = textSurface->w;
+    textRect.h = textSurface->h;
+    SDL_FreeSurface(textSurface);
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+    SDL_DestroyTexture(textTexture);
+
+    TTF_CloseFont(font);
+}
+
 void Draw(SDL_Renderer* renderer, GameState* game_state) {
 
     //set background color to whiteish gray
@@ -70,6 +110,7 @@ void Draw(SDL_Renderer* renderer, GameState* game_state) {
     //for each of the GameStates object vectors, we make a draw loop.
     _DrawPlanets(renderer, game_state);
     _DrawTrash(renderer, game_state);
+    _DrawGameOver(renderer, game_state);
 
     //present the rendered frame
     SDL_RenderPresent(renderer);

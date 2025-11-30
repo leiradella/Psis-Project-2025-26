@@ -101,9 +101,19 @@ void _UpdateTrash(GameState* game_state) {
 
 }
 
+void _CheckGameOver(GameState* game_state) {
+
+    //once the trash hits the max, its game over
+    //were gonna make a text appear on screen
+    if (game_state->n_trashes >= game_state->max_trash) {
+        game_state->is_game_over = 1;
+    }
+}
 
 void UpdateUniverse(GameState* game_state) {
     //update each object vector in the game state
     _UpdatePlanets(game_state);
     _UpdateTrash(game_state);
+
+    _CheckGameOver(game_state);
 }

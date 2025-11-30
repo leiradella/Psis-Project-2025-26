@@ -65,6 +65,8 @@ typedef struct GameState {
     Trash *trashes;
     int n_trashes;
     int max_trash;
+
+    int is_game_over;
 } GameState;
 
 //Vector creation from x and y components
