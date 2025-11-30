@@ -60,18 +60,19 @@ int main() {
     int seed = rand(); //initialize seed with a random value
 
     //create the universal initial state here using universe_config parameters
-    Planet* planets = CreateInitialUniverseState("universe_config.conf", seed);
-    int n_planets = GetNumberPlanets("universe_config.conf");
+    GameState* game_state = CreateInitialUniverseState("universe_config.conf", seed);
+
 
     //main loop: check events, update universe state, draw universe
     while (running) {
-        CheckEvents(&running);
-        UpdateUniverse(planets);
-        Draw(renderer, planets, n_planets);
+        CheckEvents(&running, game_state);
+        UpdateUniverse(game_state);
+        Draw(renderer, game_state);
     }
 
     //free allocated universe state memory
-    free(planets);
+    DestroyUniverse(&game_state);
+
 
     //destroy SDL variables and quit SDL
     SDL_DestroyRenderer(renderer);

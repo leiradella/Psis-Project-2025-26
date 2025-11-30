@@ -7,7 +7,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
-void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets) {
+void Draw(SDL_Renderer* renderer, GameState* game_state) {
 
     //load font for planet names
     TTF_Font* font = TTF_OpenFont("arial.ttf", 12);
@@ -21,14 +21,14 @@ void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets) {
     SDL_RenderClear(renderer);
 
     //planets will be drawn as just circles with their names on the top right
-    for (int i = 0; i < n_planets; i++) {
+    for (int i = 0; i < game_state->n_planets; i++) {
         //draw planet i as a filled circle (blue)
-        filledCircleRGBA(renderer, (int)planets[i].position.x, (int)planets[i].position.y, (int)planets[i].radius, 0, 0, 255, 255);
+        filledCircleRGBA(renderer, (int)game_state->planets[i].position.x, (int)game_state->planets[i].position.y, (int)game_state->planets[i].radius, 0, 0, 255, 255);
 
         //draw planet name at top-right of planet
         //name is a single char + the amount of trash inside the planet
         char name_text[10];
-        snprintf(name_text, sizeof(name_text), "%c%d", planets[i].name, planets[i].trash_amount);
+        snprintf(name_text, sizeof(name_text), "%c%d", game_state->planets[i].name, game_state->planets[i].trash_amount);
         SDL_Color textColor = {0, 0, 0, 255}; //black color
         
         SDL_Surface* textSurface = TTF_RenderText_Solid(font, name_text, textColor);
@@ -45,8 +45,8 @@ void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets) {
         }
 
         SDL_Rect textRect;
-        textRect.x = (int)(planets[i].position.x + planets[i].radius);
-        textRect.y = (int)(planets[i].position.y - planets[i].radius);
+        textRect.x = (int)(game_state->planets[i].position.x + game_state->planets[i].radius);
+        textRect.y = (int)(game_state->planets[i].position.y - game_state->planets[i].radius);
         textRect.w = textSurface->w * 2;  
         textRect.h = textSurface->h * 2;
         SDL_FreeSurface(textSurface);

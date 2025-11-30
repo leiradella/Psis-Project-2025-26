@@ -56,6 +56,9 @@ typedef struct GameState {
 #define INITIAL_TRASH_AMOUNT 0
 #define MIN_PLANET_DISTANCE 80.0f
 
+#define TRASH_MASS 1
+#define TRASH_RADIUS 2.0f
+
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config
 int _GetUniverseParameters(const char* config_name, UniverseConfig* universe_config);
@@ -77,11 +80,20 @@ int _IsValidPosition(float x, float y, float* points_x, float* points_y, int num
 //planets not placed yet have invalid positions (-100.0f, -100.0f)
 void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int seed);
 
+//initialize all planets with default values (mass, radius, name, trash amount)
+Planet* _InitializePlanets(int n_planets, int universe_size, int seed);
+
+//position all trash randomly within the universe size using the seed value (like _PositionPlanets)
+void _PositionTrash(Trash* trashes, int n_trashes, int universe_size, int seed);
+
+//initialize all trash with default values (mass, radius, position, velocity)
+Trash* _InitializeTrash(int n_trashes, int universe_size, int seed);
+
 //create the universe initial state using the universe configuration
 //this function is the only public function related to universe data reading
-Planet* CreateInitialUniverseState(const char* config_name, int seed);
+GameState* CreateInitialUniverseState(const char* config_name, int seed);
 
-//get number of planets from config file
-int GetNumberPlanets(const char* config_name);
+//DESTROY THE UNIVERSE (and free all allocated memory)
+void DestroyUniverse(GameState** game_state);
 
 #endif

@@ -6,9 +6,9 @@
 #include "universe-data.h"
 
 //check events function
-void CheckEvents(int* running);
+void CheckEvents(int* running, GameState* game_state);
 
 //universe update function
-void UpdateUniverse(Planet* planets);
+void UpdateUniverse(GameState* game_state);
 
 #endif

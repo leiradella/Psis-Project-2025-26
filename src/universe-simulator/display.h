@@ -7,6 +7,6 @@
 #include "universe-data.h"
 
 //draw function
-void Draw(SDL_Renderer* renderer, Planet* planets, int n_planets);
+void Draw(SDL_Renderer* renderer, GameState* game_state);
 
 #endif

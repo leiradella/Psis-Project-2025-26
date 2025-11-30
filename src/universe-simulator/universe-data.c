@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include <libconfig.h>
 
@@ -112,7 +111,85 @@ void _PositionPlanets(Planet* planets, int n_planets, int universe_size, int see
     }
 }
 
-Planet *CreateInitialUniverseState(const char* config_name, int seed) {
+Planet *_InitializePlanets(int n_planets, int universe_size, int seed) {
+    //create a vector with all planets
+    Planet* planets = (Planet*)malloc(n_planets * sizeof(Planet));
+
+    //initialize radius and mass constants, names, positions, and trash amounts
+    for (int i = 0; i < n_planets; i++) {
+        planets[i].mass = PLANET_MASS;
+        planets[i].radius = PLANET_RADIUS;
+        planets[i].trash_amount = INITIAL_TRASH_AMOUNT;
+        planets[i].name = 'A' + i; //assign names like A B C...
+
+        //initialize positions with invalid values
+        planets[i].position.x = -100.0f;
+        planets[i].position.y = -100.0f;
+    }
+
+    //position all planets
+    _PositionPlanets(planets, n_planets, universe_size, seed);
+
+    return planets;
+}
+
+void _PositionTrash(Trash* trashes, int n_trashes, int universe_size, int seed) {
+
+    //coordinate variables
+    float x, y;
+
+    //loop flags
+    int positioned = 0;
+    int attempts = 0;
+    const int max_attempts = 1000 * n_trashes; //max attempts to position all trash
+
+    //current trash index
+    int current_trash = 0;
+
+    while (!positioned && attempts < max_attempts) {
+        attempts++;
+        
+        //get random coordinates within bounds (TRASH_RADIUS from edges)
+        float range = universe_size - 2 * TRASH_RADIUS;
+        x = TRASH_RADIUS + ((float)(rand_r((unsigned int*)&seed) % (int)range));
+        y = TRASH_RADIUS + ((float)(rand_r((unsigned int*)&seed) % (int)range));
+
+        //assign position to trash
+        trashes[current_trash].position.x = x;
+        trashes[current_trash].position.y = y;
+        current_trash++;
+
+        if (current_trash >= n_trashes) {
+            //all trash positioned
+            positioned = 1;
+        }
+    }
+}
+
+Trash *_InitializeTrash(int n_trashes, int universe_size, int seed) {
+    
+    //create trash vector
+    Trash *trashes = (Trash*)malloc(n_trashes * sizeof(Trash));
+
+    //initialize trash properties
+    for (int i = 0; i < n_trashes; i++) {
+        trashes[i].mass = TRASH_MASS; 
+        trashes[i].radius = TRASH_RADIUS;
+        trashes[i].position.x = -100.0f;
+        trashes[i].position.y = -100.0f;
+
+        //initialize with random velocity
+        trashes[i].velocity.amplitude = ((float)(rand_r((unsigned int*)&seed) % 100)) / 100.0f; //0.0 to 1.0
+        trashes[i].velocity.angle = ((float)(rand_r((unsigned int*)&seed) % 360)); //0 to 359 degrees
+    }
+
+    //position all trash
+    _PositionTrash(trashes, n_trashes, universe_size, seed);
+
+    return trashes;
+}
+
+GameState *CreateInitialUniverseState(const char* config_name, int seed) {
 
     //create a universe config struct with the parameters
     UniverseConfig universe_config;
@@ -123,43 +200,26 @@ Planet *CreateInitialUniverseState(const char* config_name, int seed) {
     //now we can use universe_config to create the initial state of the universe
     //the results are semi deterministic based on the seed value
 
-    //create a vector with all planets
-    Planet* planets = malloc(universe_config.n_planets * sizeof(Planet));
 
-    //initialize radius and mass constants, names, positions, and trash amounts
-    for (int i = 0; i < universe_config.n_planets; i++) {
-        planets[i].mass = PLANET_MASS;
-        planets[i].radius = PLANET_RADIUS;
-        planets[i].trash_amount = INITIAL_TRASH_AMOUNT;
-        planets[i].name = 'A' + i; //assign names like A B C...
+    //initialize the planets (mass, radius, name, trash amount, position)
+    Planet* planets = _InitializePlanets(universe_config.n_planets, universe_config.universe_size, seed);
 
-        //initialize positions with invalid values
-        planets[i].position.x = -100.0f;
-        planets[i].position.y = -100.0f;
-    }
-    
-    //position all planets
-    _PositionPlanets(planets, universe_config.n_planets, universe_config.universe_size, seed);
+    //initialize the trash
+    Trash *trashes = _InitializeTrash(universe_config.starting_trash, universe_config.universe_size, seed);
 
-    return planets;
+    //gamestate struct to return
+    GameState* game_state = malloc(sizeof(GameState));
+    game_state->planets = planets;
+    game_state->n_planets = universe_config.n_planets;
+    game_state->trashes = trashes;
+    game_state->n_trashes = 0;
+
+    return game_state;
 }
 
-int GetNumberPlanets(const char* config_name) {
-
-    int n_planets;
-
-    config_t cfg;
-    config_init(&cfg);
-    if (config_read_file(&cfg, config_name) == CONFIG_FALSE) {
-        printf("Error in %s at line %d: %s\n", config_error_file(&cfg), config_error_line(&cfg), config_error_text(&cfg));
-        config_destroy(&cfg);
-        return 0;
-    }
-
-    //get the params with the config file
-    _LookupUniverseInt(&cfg, &n_planets, "universe.n_planets");
-
-    config_destroy(&cfg);
-
-    return n_planets;
+void DestroyUniverse(GameState** game_state) {
+    free((*game_state)->planets);
+    free((*game_state)->trashes);
+    free(*game_state);
+    *game_state = NULL;
 }
