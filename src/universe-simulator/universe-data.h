@@ -12,6 +12,9 @@
 #define TRASH_MASS 1
 #define TRASH_RADIUS 4.0f
 
+//math constants
+#define PI 3.14159265f
+
 //unvierse configuration structure
 typedef struct UniverseConfig {
     int universe_size;
@@ -22,7 +25,6 @@ typedef struct UniverseConfig {
 } UniverseConfig;
 
 //universe objects and other structures
-
 //position structure
 typedef struct Position {
     float x;
@@ -48,17 +50,25 @@ typedef struct Planet {
 typedef struct Trash {
     Position position;
     Vector velocity;
+    Vector acceleration;
     int mass;
     float radius;
 } Trash;
 
 //game state structure (so that we dont pass too many parameters on the main loop)
 typedef struct GameState {
+    int universe_size;
     Planet* planets;
     int n_planets;
     Trash *trashes;
     int n_trashes;
 } GameState;
+
+//Vector creation from x and y components
+Vector MakeVector(float x, float y);
+
+//Vector addition
+Vector AddVectors(Vector v1, Vector v2);
 
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config

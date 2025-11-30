@@ -1,9 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <libconfig.h>
 
 #include "universe-data.h"
+
+Vector MakeVector(float x, float y) {
+    Vector result;
+    result.amplitude = sqrt(x * x + y * y);
+    result.angle = atan2(y, x) * (180.0f / PI); //convert to degrees
+    return result;
+}
+
+Vector AddVectors(Vector v1, Vector v2) {
+    //convert to coordinates
+    float x1 = v1.amplitude * cos(v1.angle * (PI / 180.0f));
+    float y1 = v1.amplitude * sin(v1.angle * (PI / 180.0f));
+    float x2 = v2.amplitude * cos(v2.angle * (PI / 180.0f));
+    float y2 = v2.amplitude * sin(v2.angle * (PI / 180.0f));
+
+    //add components
+    float x_total = x1 + x2;
+    float y_total = y1 + y2;
+
+    //convert back to polar coordinates
+    return MakeVector(x_total, y_total);
+}
 
 int _GetUniverseParameters(const char* config_name, UniverseConfig* universe_config) {
     //init and read config file
@@ -181,6 +204,10 @@ Trash *_InitializeTrash(int n_trashes, int universe_size, int seed) {
         //initialize with random velocity
         trashes[i].velocity.amplitude = ((float)(rand_r((unsigned int*)&seed) % 100)) / 100.0f; //0.0 to 1.0
         trashes[i].velocity.angle = ((float)(rand_r((unsigned int*)&seed) % 360)); //0 to 359 degrees
+
+        //no initial acceleration
+        trashes[i].acceleration.amplitude = 0.0f;
+        trashes[i].acceleration.angle = 0.0f;
     }
 
     //position all trash
@@ -209,6 +236,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
 
     //gamestate struct to return
     GameState* game_state = malloc(sizeof(GameState));
+    game_state->universe_size = universe_config.universe_size;
     game_state->planets = planets;
     game_state->n_planets = universe_config.n_planets;
     game_state->trashes = trashes;

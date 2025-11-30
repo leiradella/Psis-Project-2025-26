@@ -1,5 +1,6 @@
 COMPILER = gcc
 CFLAGS = -Wall -Wextra -g -Werror -pedantic
+MATHFLAGS = -lm
 CONFIGFLAGS = -lconfig
 SDLFLAGS = -lSDL2 -lSDL2_image -lSDL2_gfx -lSDL2_ttf
 ZMQFLAGS = -lzmq
@@ -11,7 +12,7 @@ SRCS = universe-simulator.c universe-data.c physics-rules.c display.c
 all: $(TARGET)
 
 $(TARGET): $(SRCS)
-	$(COMPILER) $(CFLAGS) -o $(TARGET) $(SRCS) $(CONFIGFLAGS) $(SDLFLAGS) $(ZMQFLAGS) $(PROTOCFLAGS)
+	$(COMPILER) $(CFLAGS) -o $(TARGET) $(SRCS) $(CONFIGFLAGS) $(SDLFLAGS) $(ZMQFLAGS) $(PROTOCFLAGS) $(MATHFLAGS)
 
 clean:
 	rm -f $(TARGET)
