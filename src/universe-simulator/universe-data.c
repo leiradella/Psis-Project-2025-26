@@ -212,7 +212,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     game_state->planets = planets;
     game_state->n_planets = universe_config.n_planets;
     game_state->trashes = trashes;
-    game_state->n_trashes = 0;
+    game_state->n_trashes = universe_config.starting_trash;
 
     return game_state;
 }

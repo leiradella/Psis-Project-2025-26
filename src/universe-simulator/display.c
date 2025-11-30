@@ -7,7 +7,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
-void Draw(SDL_Renderer* renderer, GameState* game_state) {
+void _DrawPlanets(SDL_Renderer* renderer, GameState* game_state) {
 
     //load font for planet names
     TTF_Font* font = TTF_OpenFont("arial.ttf", 12);
@@ -15,10 +15,6 @@ void Draw(SDL_Renderer* renderer, GameState* game_state) {
         printf("Failed to load font: %s\n", TTF_GetError());
         exit(1);
     }
-
-    //set background color to whiteish gray
-    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-    SDL_RenderClear(renderer);
 
     //planets will be drawn as just circles with their names on the top right
     for (int i = 0; i < game_state->n_planets; i++) {
@@ -53,6 +49,27 @@ void Draw(SDL_Renderer* renderer, GameState* game_state) {
         SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
         SDL_DestroyTexture(textTexture);
     }
+
+    TTF_CloseFont(font);
+}
+
+void _DrawTrash(SDL_Renderer* renderer, GameState* game_state) {
+    
+    //trash will be drawn as small red circles
+    for (int i = 0; i < game_state->n_trashes; i++) {
+        filledCircleRGBA(renderer, (int)game_state->trashes[i].position.x, (int)game_state->trashes[i].position.y, (int)game_state->trashes[i].radius, 255, 0, 0, 255);
+    }
+}
+
+void Draw(SDL_Renderer* renderer, GameState* game_state) {
+
+    //set background color to whiteish gray
+    SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+    SDL_RenderClear(renderer);
+
+    //for each of the GameStates object vectors, we make a draw loop.
+    _DrawPlanets(renderer, game_state);
+    _DrawTrash(renderer, game_state);
 
     //present the rendered frame
     SDL_RenderPresent(renderer);

@@ -3,6 +3,15 @@
 
 #include <libconfig.h>
 
+//default values for universe objects
+#define PLANET_MASS 10
+#define PLANET_RADIUS 20.0f
+#define INITIAL_TRASH_AMOUNT 0
+#define MIN_PLANET_DISTANCE 80.0f
+
+#define TRASH_MASS 1
+#define TRASH_RADIUS 4.0f
+
 //unvierse configuration structure
 typedef struct UniverseConfig {
     int universe_size;
@@ -50,14 +59,6 @@ typedef struct GameState {
     Trash *trashes;
     int n_trashes;
 } GameState;
-
-#define PLANET_MASS 10
-#define PLANET_RADIUS 20.0f
-#define INITIAL_TRASH_AMOUNT 0
-#define MIN_PLANET_DISTANCE 80.0f
-
-#define TRASH_MASS 1
-#define TRASH_RADIUS 2.0f
 
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config
