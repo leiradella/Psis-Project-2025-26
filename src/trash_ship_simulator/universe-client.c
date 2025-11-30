@@ -6,14 +6,30 @@ int main(int argc, char *argv[])
 
     //Create a simple client that reads the cursor keys
 
-    if(SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    if(SDL_Init(SDL_INIT_EVERYTHING) != 0){
         printf("error initializing SDL: %s\n", SDL_GetError());
+        return -1;
+    }
 
     SDL_Window *win = SDL_CreateWindow("ShipClient",
                                         SDL_WINDOWPOS_CENTERED, 
                                         SDL_WINDOWPOS_CENTERED,
                                         1000, 1000, 0);
 
+    if( win == NULL){
+        printf("error initializing SDL: %s\n", SDL_GetError());
+        SDL_Quit();
+        return -1;
+    }
+
+    /*
+    //Create ZMQ_Context
+    void *context = zmq_ctx_new();
+
+    //Socket to send messages to
+    void *sender = zmq_socket(context, ZMQ_PUSH);
+    zmq_connect(sender, "tcp://localhost:5558");
+    */
 
     int close = 0;
     while(!close)
@@ -59,6 +75,8 @@ int main(int argc, char *argv[])
             break;
         }
 
+        //Add comunication
+        
     }
 
     SDL_DestroyWindow(win);
