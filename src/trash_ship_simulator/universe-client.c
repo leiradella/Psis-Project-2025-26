@@ -2,6 +2,41 @@
 #include <SDL2/SDL.h>
 #include <zmq.h>
 
+struct contextDataforClosing{
+    void (*pFunction)(void *);
+    void *pArguments;
+    struct contextDataforClosing *pPreviousStruct;
+};
+
+void closeContexts(struct contextDataforClosing *Data){
+    printf("Executing close contexts\n");
+    (Data->pFunction)((void*)Data->pArguments);
+    printf("Completed close contexts\n");
+    printf("%p\n", Data->pPreviousStruct);
+    if((Data->pPreviousStruct)){
+        printf("Recurisng\n");
+        closeContexts(Data->pPreviousStruct);
+    }
+    free(Data);
+}
+
+struct contextDataforClosing *createContextDataforClosing(  void *pInFunction, void *pInArguments, 
+                                                        struct contextDataforClosing *pInPreviousStruct){
+
+    struct contextDataforClosing *newStruct = malloc(sizeof(struct contextDataforClosing));
+
+    if(!newStruct){
+        closeContexts(pInPreviousStruct);
+        printf("Failed to create programContext(malloc).\n");
+        return NULL;
+    }
+
+    newStruct->pFunction = pInFunction;
+    newStruct->pArguments = pInArguments;
+    newStruct->pPreviousStruct = pInPreviousStruct;
+    return newStruct;
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -12,6 +47,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    struct contextDataforClosing *programContext = createContextDataforClosing(SDL_Quit, NULL, NULL);
+
+    if(!programContext) return -1;
+
     SDL_Window *pWin = SDL_CreateWindow("ShipClient",
                                         SDL_WINDOWPOS_CENTERED, 
                                         SDL_WINDOWPOS_CENTERED,
@@ -19,30 +58,40 @@ int main(int argc, char *argv[])
 
     if(!pWin){
         printf("error initializing SDL: %s\n", SDL_GetError());
-        SDL_Quit();
+        closeContexts(programContext);
         return -1;
     }
+
+    programContext = createContextDataforClosing(SDL_DestroyWindow, pWin, programContext);
+
+    if(!programContext) return -1;
 
     //Create ZMQ_Context
-    void *context = zmq_ctx_new();
+    void *pContext = zmq_ctx_new();
 
-    if(!context){
+    if(!pContext){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
-        SDL_DestroyWindow(pWin);
-        SDL_Quit();
+        closeContexts(programContext);
         return -1;
     }
 
+    programContext = createContextDataforClosing(zmq_ctx_destroy, pContext, programContext);
+
+    if(!programContext) return -1;
+
     //Socket to send messages to
-    void *sender = zmq_socket(context, ZMQ_PUSH);
+    void *sender = zmq_socket(pContext, ZMQ_PUSH);
     zmq_connect(sender, "tcp://localhost:5558");
 
     if(!sender){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
-        zmq_ctx_destroy(context);
-        SDL_DestroyWindow(pWin);
-        SDL_Quit();
+        closeContexts(programContext);
+        return -1;
     }
+
+    programContext = createContextDataforClosing(zmq_close, sender, programContext);
+
+    if(!programContext) return -1;
 
     int close = 0;
     while(!close)
@@ -92,13 +141,8 @@ int main(int argc, char *argv[])
         
     }
 
-    zmq_close(sender);
-
-    zmq_ctx_destroy(context);
-
-    SDL_DestroyWindow(pWin);
-
-    SDL_Quit();
+    printf("closing.\n");
+    closeContexts(programContext);
 
     return 0;
 }
