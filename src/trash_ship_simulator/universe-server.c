@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <zmq.h>
+#include "mylib.c"
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +20,6 @@ int main(int argc, char *argv[])
     //Socket to send messages to
     void *pReceive = zmq_socket(pContext, ZMQ_PULL);
     zmq_bind(pReceive, "tcp://localhost:5558");
-
     if(!pReceive){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
         closeContexts(programContext);
@@ -30,16 +30,19 @@ int main(int argc, char *argv[])
 
     if(!programContext) return -1;
 
-    while (1)
+    do
     {
-        int n;
-        char buffer [2];
+        char msg;//char buffer [2];
+        printf("Waiting for message.\n");
+        int size = zmq_recv(pReceive, &msg, 1, 0);
+        printf("Received message.\n");
+        //buffer[1] = '\0';
 
-        int size = zmq_recv(pReceive, buffer, 1, 0);
+        printf("%c\n", msg);
+    }while(1);
+    
 
-        buffer[1] = '\0';
-
-        printf("%s", buffer);
-    }
+    closeContexts(programContext);
+    return 0;
     
 }

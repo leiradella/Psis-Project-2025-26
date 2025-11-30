@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     if(!programContext) return -1;
 
     int close = 0;
+    char msg;
+
     while(!close)
     {
         SDL_Event event;
@@ -79,32 +81,41 @@ int main(int argc, char *argv[])
             case SDL_SCANCODE_W:
             case SDL_SCANCODE_UP:
                 printf("UP -- Implement code\n");
+                msg = 'u';
                 break;
             
             case SDL_SCANCODE_A:
             case SDL_SCANCODE_LEFT:
                 printf("LEFT -- Implement code\n");
+                msg = 'l';
                 break;
 
             case SDL_SCANCODE_S:
             case SDL_SCANCODE_DOWN:
                 printf("DOWN -- Implement code\n");
+                msg = 'd';
                 break;
 
             case SDL_SCANCODE_D:
             case SDL_SCANCODE_RIGHT:
                 printf("RIGHT -- Implement code\n");
+                msg = 'r';
                 break;
 
             default:
+                printf("Key wasn't a direction.\n");
                 break;
+
             }
         default:
+            printf("Not a keypress.\n");
             break;
         }
 
         //Add comunication
-        
+        printf("Going to send message.\n");
+        zmq_send(sender, &msg, 1, 0);
+        printf("Message sent.\n");
     }
 
     printf("closing.\n");

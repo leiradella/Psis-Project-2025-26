@@ -5,8 +5,8 @@ universe-client: universe-client.c
 		-lSDL2 -lSDL2_image -lzmq
 
 universe-server: universe-server.c
-	gcc -g universe-client.c -o universe-server \
-		-lSDL2 -lSDL2_image
+	gcc -g universe-server.c -o universe-server \
+		-lSDL2 -lSDL2_image -lzmq
 
 clean:
-	rm -f universe-client
+	rm -f universe-client universe-server
