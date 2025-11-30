@@ -232,7 +232,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     Planet* planets = _InitializePlanets(universe_config.n_planets, universe_config.universe_size, seed);
 
     //initialize the trash
-    Trash *trashes = _InitializeTrash(universe_config.starting_trash, universe_config.universe_size, seed);
+    Trash *trashes = _InitializeTrash(universe_config.max_trash, universe_config.universe_size, seed);
 
     //gamestate struct to return
     GameState* game_state = malloc(sizeof(GameState));
@@ -241,6 +241,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     game_state->n_planets = universe_config.n_planets;
     game_state->trashes = trashes;
     game_state->n_trashes = universe_config.starting_trash;
+    game_state->max_trash = universe_config.max_trash;
 
     return game_state;
 }

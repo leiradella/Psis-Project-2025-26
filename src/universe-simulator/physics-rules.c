@@ -65,6 +65,27 @@ void _NewTrashPosition(GameState* game_state) {
         else if (game_state->trashes[i].position.y > game_state->universe_size) {
             game_state->trashes[i].position.y -= game_state->universe_size;
         }
+
+        //planet collision
+        if (game_state->n_trashes >= game_state->max_trash) {
+            continue; //skip collision if at max trash
+        }
+        for (int j = 0; j < game_state->n_planets; j++) {
+            float dx = game_state->trashes[i].position.x - game_state->planets[j].position.x;
+            float dy = game_state->trashes[i].position.y - game_state->planets[j].position.y;
+            float distance = sqrt(dx * dx + dy * dy);
+            if (distance < COLLISION_DISTANCE) {
+                //create 2 trashes from the collision (reuse the current trash and create a new one)
+                
+                //add a new trash child into this dog gone universe
+                game_state->trashes[game_state->n_trashes] = game_state->trashes[i];
+                game_state->n_trashes++;
+
+                //slightly change both their angles based on the collision
+                game_state->trashes[i].velocity.angle += 15.0f;
+                game_state->trashes[game_state->n_trashes - 1].velocity.angle -= 15.0f;
+            }
+        }
     }
 }
 

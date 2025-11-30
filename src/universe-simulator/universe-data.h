@@ -12,6 +12,8 @@
 #define TRASH_MASS 1
 #define TRASH_RADIUS 4.0f
 
+#define COLLISION_DISTANCE 1.0f
+
 //math constants
 #define PI 3.14159265f
 
@@ -62,6 +64,7 @@ typedef struct GameState {
     int n_planets;
     Trash *trashes;
     int n_trashes;
+    int max_trash;
 } GameState;
 
 //Vector creation from x and y components
