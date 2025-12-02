@@ -1,7 +1,22 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_timer.h>
 #include <zmq.h>
 #include "mylib.c"
+#include "msg.pb-c.h"
+
+Uint32 timer_callback(Uint32 interval, void *param){
+    SDL_Event timer_event;
+    printf("Timer callback function\n");
+
+    SDL_zero(timer_event);
+    timer_event.type = SDL_USEREVENT;
+    timer_event.user.code = 2;
+    timer_event.user.data1 = NULL;
+    timer_event.user.data2 = NULL;
+    SDL_PushEvent(&timer_event);
+    return interval;
+}
 
 int main(int argc, char *argv[])
 {
@@ -60,7 +75,15 @@ int main(int argc, char *argv[])
     if(!programContext) return -1;
 
     int close = 0;
-    char msg;
+
+    u_int8_t msg = 0;
+
+    Client protoMessage = CLIENT__INIT;
+    int msg_len = client__get_packed_size(&protoMessage);
+    uint8_t *buffer = (uint8_t *)malloc(msg_len);
+
+    SDL_TimerID timer_id = 0;
+    timer_id = SDL_AddTimer(100, (SDL_TimerCallback)timer_callback, NULL);
 
     while(!close)
     {
@@ -81,25 +104,25 @@ int main(int argc, char *argv[])
             case SDL_SCANCODE_W:
             case SDL_SCANCODE_UP:
                 printf("UP -- Implement code\n");
-                msg = 'u';
+                msg |= MYUP;
                 break;
             
             case SDL_SCANCODE_A:
             case SDL_SCANCODE_LEFT:
                 printf("LEFT -- Implement code\n");
-                msg = 'l';
+                msg |= MYLEFT;
                 break;
 
             case SDL_SCANCODE_S:
             case SDL_SCANCODE_DOWN:
                 printf("DOWN -- Implement code\n");
-                msg = 'd';
+                msg |= MYDOWN;
                 break;
 
             case SDL_SCANCODE_D:
             case SDL_SCANCODE_RIGHT:
                 printf("RIGHT -- Implement code\n");
-                msg = 'r';
+                msg |= MYRIGHT;
                 break;
 
             default:
@@ -107,18 +130,35 @@ int main(int argc, char *argv[])
                 break;
 
             }
+
+        case SDL_USEREVENT:
+            if(event.user.code == 2){
+                //Add comunication
+                printf("Escrever em protomsg.\n");
+                protoMessage.ch.data = &msg;
+                printf("Escrevi em protomsg.\n");
+                protoMessage.ch.len = 1;
+                client__pack(&protoMessage, buffer);
+                printf("Going to send message.\n");
+                
+                printf("%d", msg_len);
+                zmq_send(sender, buffer, msg_len, 0);
+                //printf("Message sent %c.\n", msg);
+                msg = 0;
+            }
+            break;
+
         default:
             printf("Not a keypress.\n");
             break;
         }
 
-        //Add comunication
-        printf("Going to send message.\n");
-        zmq_send(sender, &msg, 1, 0);
-        printf("Message sent.\n");
+
     }
 
     printf("closing.\n");
+    free(buffer);
+    SDL_RemoveTimer(timer_id);
     closeContexts(programContext);
 
     return 0;

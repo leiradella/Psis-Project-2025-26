@@ -2,6 +2,11 @@
 
 #define MYLIB_H
 
+#define MYLEFT  8
+#define MYUP    4
+#define MYDOWN  2
+#define MYRIGHT 1
+
 struct contextDataforClosing{
     void (*pFunction)(void *);
     void *pArguments;

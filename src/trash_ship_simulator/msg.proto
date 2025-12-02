@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+//Mensagem enviada pelo cliente
+//Transporta como informação todos as teclas
+//De direção que foram direcionadas
+
+message client{
+    required bytes ch = 1;
+}

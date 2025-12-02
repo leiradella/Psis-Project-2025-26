@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <zmq.h>
 #include "mylib.c"
+#include "msg.pb-c.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,18 +31,33 @@ int main(int argc, char *argv[])
 
     if(!programContext) return -1;
 
+    zmq_msg_t zmq_msg;
+    zmq_msg_init(&zmq_msg);
+    u_int8_t msg;
+
     do
     {
-        char msg;//char buffer [2];
+        msg = 0;
         printf("Waiting for message.\n");
-        int size = zmq_recv(pReceive, &msg, 1, 0);
-        printf("Received message.\n");
+        int size = zmq_recvmsg(pReceive, &zmq_msg, 0);
+        printf("Received message of size %d.\n", size);
+        void *msg_data = zmq_msg_data(&zmq_msg);
+        printf("Saved Message Data to %p.\n", msg_data);
+        Client *protoMessage = client__unpack(NULL, size, msg_data);
+        printf("Unpacked Message.\n");
+        printf("%p\n", protoMessage);
+        if(protoMessage){
+            printf("Entered if.\n");
+            msg = *(protoMessage->ch.data);
+            printf("Copied message content.\n");
+            client__free_unpacked(protoMessage, NULL);
+        }
+
         //buffer[1] = '\0';
 
-        printf("%c\n", msg);
+        //printf("%b\n", msg);
     }while(1);
     
-
     closeContexts(programContext);
     return 0;
     
