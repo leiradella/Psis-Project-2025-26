@@ -49,8 +49,9 @@ int main(int argc, char *argv[])
         if(protoMessage){
             printf("Entered if.\n");
             msg = *(protoMessage->ch.data);
-            printf("Copied message content.\n");
+            printf("Copied message content. %d\n", msg);
             client__free_unpacked(protoMessage, NULL);
+
         }
 
         //buffer[1] = '\0';

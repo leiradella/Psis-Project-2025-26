@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
     u_int8_t msg = 0;
 
     Client protoMessage = CLIENT__INIT;
-    int msg_len = client__get_packed_size(&protoMessage);
-    uint8_t *buffer = (uint8_t *)malloc(msg_len);
 
     SDL_TimerID timer_id = 0;
     timer_id = SDL_AddTimer(100, (SDL_TimerCallback)timer_callback, NULL);
@@ -138,13 +136,18 @@ int main(int argc, char *argv[])
                 protoMessage.ch.data = &msg;
                 printf("Escrevi em protomsg.\n");
                 protoMessage.ch.len = 1;
+                int msg_len = client__get_packed_size(&protoMessage);
+                uint8_t *buffer = (uint8_t *)malloc(msg_len);
                 client__pack(&protoMessage, buffer);
                 printf("Going to send message.\n");
                 
                 printf("%d", msg_len);
+                
                 zmq_send(sender, buffer, msg_len, 0);
                 //printf("Message sent %c.\n", msg);
                 msg = 0;
+                free(buffer);
+
             }
             break;
 
@@ -157,7 +160,6 @@ int main(int argc, char *argv[])
     }
 
     printf("closing.\n");
-    free(buffer);
     SDL_RemoveTimer(timer_id);
     closeContexts(programContext);
 
