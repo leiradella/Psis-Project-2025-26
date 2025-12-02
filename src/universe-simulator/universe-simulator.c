@@ -72,6 +72,8 @@ int main() {
         CheckEvents(&running, game_state);
         UpdateUniverse(game_state);
         Draw(renderer, game_state);
+
+        SDL_Delay(16); 
     }
 
     //free allocated universe state memory
