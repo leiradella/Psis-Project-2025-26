@@ -20,6 +20,8 @@ Uint32 timer_callback(Uint32 interval, void *param){
 
 int main(int argc, char *argv[])
 {
+    //****************************************+
+    //Prepare for SDL and ZMQ
 
     //Create a simple client that reads the cursor keys
 
@@ -35,7 +37,7 @@ int main(int argc, char *argv[])
     SDL_Window *pWin = SDL_CreateWindow("ShipClient",
                                         SDL_WINDOWPOS_CENTERED, 
                                         SDL_WINDOWPOS_CENTERED,
-                                        1000, 1000, 0);
+                                        100, 100, 0);
 
     if(!pWin){
         printf("error initializing SDL: %s\n", SDL_GetError());
@@ -61,8 +63,8 @@ int main(int argc, char *argv[])
     if(!programContext) return -1;
 
     //Socket to send messages to
-    void *sender = zmq_socket(pContext, ZMQ_PUSH);
-    zmq_connect(sender, "tcp://localhost:5558");
+    void *sender = zmq_socket(pContext, ZMQ_REQ);
+    zmq_connect(sender, "tcp://localhost:5556");
 
     if(!sender){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
@@ -74,91 +76,84 @@ int main(int argc, char *argv[])
 
     if(!programContext) return -1;
 
-    int close = 0;
 
-    u_int8_t msg = 0;
+    //Program Start
+    int close;
+
 
     Client protoMessage = CLIENT__INIT;
+
+    //Get a ship id
+        //Send a request for a ship
+    u_int8_t msg = GETID;
+    protoMessage.ch.data = &msg;
+    protoMessage.ch.len = 1;
     int msg_len = client__get_packed_size(&protoMessage);
     uint8_t *buffer = (uint8_t *)malloc(msg_len);
+    client__pack(&protoMessage, buffer);
+    printf("Sent request for ID of size %d.\n", msg_len);
 
-    SDL_TimerID timer_id = 0;
-    timer_id = SDL_AddTimer(100, (SDL_TimerCallback)timer_callback, NULL);
+    zmq_send(sender, buffer, msg_len, 0);
+
+        //Process server reponse to ship request
+    zmq_recv(sender, buffer, msg_len, 0);
+    Client *pProtoMessage = client__unpack(NULL, msg_len, buffer);
+    msg = *((pProtoMessage -> ch.data));
+    client__free_unpacked(pProtoMessage,NULL);
+    uint8_t myID = msg & IDMASK;
+
+    if(myID == GETID){
+        printf("Invalid Ship id %d.\nClosing.\n", myID);
+        close = 1;
+    }else {
+        printf("Received ship id %d.\n", myID);
+        close = 0;
+    }
+
+    //Start controling the ship
 
     while(!close)
     {
         SDL_Event event;
         
         //Controlo de eventos
-        SDL_WaitEvent(&event);
-        switch (event.type)
-        {
-        case SDL_QUIT:
-            close = 1;
-            break;
-        
-        case SDL_KEYDOWN:
-            //Identificação da tecla
-            switch (event.key.keysym.scancode)
+        while(SDL_PollEvent(&event) != 0){
+            if (event.type == SDL_QUIT)
             {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                printf("UP -- Implement code\n");
-                msg |= MYUP;
+                close = 1;
                 break;
-            
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                printf("LEFT -- Implement code\n");
-                msg |= MYLEFT;
-                break;
-
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                printf("DOWN -- Implement code\n");
-                msg |= MYDOWN;
-                break;
-
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                printf("RIGHT -- Implement code\n");
-                msg |= MYRIGHT;
-                break;
-
-            default:
-                printf("Key wasn't a direction.\n");
-                break;
-
             }
-
-        case SDL_USEREVENT:
-            if(event.user.code == 2){
-                //Add comunication
-                printf("Escrever em protomsg.\n");
-                protoMessage.ch.data = &msg;
-                printf("Escrevi em protomsg.\n");
-                protoMessage.ch.len = 1;
-                client__pack(&protoMessage, buffer);
-                printf("Going to send message.\n");
-                
-                printf("%d", msg_len);
-                zmq_send(sender, buffer, msg_len, 0);
-                //printf("Message sent %c.\n", msg);
-                msg = 0;
-            }
-            break;
-
-        default:
-            printf("Not a keypress.\n");
-            break;
         }
+        const Uint8 *currentKeyStates = SDL_GetKeyboardState(NULL);
+        if (close == 1){
+            msg = ISDC;
+        } else if(currentKeyStates[SDL_SCANCODE_W]||currentKeyStates[SDL_SCANCODE_UP]){
+            msg = MYUP;
+        } else if(currentKeyStates[SDL_SCANCODE_A]||currentKeyStates[SDL_SCANCODE_LEFT]){
+            msg = MYLEFT;
+        } else if(currentKeyStates[SDL_SCANCODE_S]||currentKeyStates[SDL_SCANCODE_DOWN]){
+            msg = MYDOWN;
+        } else if(currentKeyStates[SDL_SCANCODE_D]||currentKeyStates[SDL_SCANCODE_D]){
+            msg = MYRIGHT;
+        } else {
+            msg = MYSTILL;
+        }
+        
+        printf("Information to send is %d.\n", msg);
+        //Add comunication
+        msg |= myID;
+        protoMessage.ch.data = &msg;
+        protoMessage.ch.len = 1;
+        client__pack(&protoMessage, buffer);
+                
+        zmq_send(sender, buffer, msg_len, 0);
+        printf("Message sent %d.\n", msg);
 
-
+        zmq_recv(sender, buffer, msg_len, 0);
     }
 
     printf("closing.\n");
     free(buffer);
-    SDL_RemoveTimer(timer_id);
     closeContexts(programContext);
 
     return 0;

@@ -2,10 +2,40 @@
 
 #define MYLIB_H
 
-#define MYLEFT  8
-#define MYUP    4
+
+//Descriptors of message content
+
+#define GETID   248         //For server
+
+#define MAXPLAYERS  248     //For client
+#define SUCCESS     1       
+#define FAIL        0 
+
+#define ISMOVE  0
+#define ISDC    7
+#define MYSTILL 4
+
+#define MYLEFT  1
+#define MYUP    0
 #define MYDOWN  2
-#define MYRIGHT 1
+#define MYRIGHT 0
+
+#define IDMASK  248
+#define CODEMASK 7
+
+#define LASTSHIPID 19
+
+//Other constants
+
+#define SPACESHIPSPEED 10
+#define ANGLEUP 0
+#define ANGLELEFT PI / 2
+#define ANGLEDOWN PI
+#define ANGLERIGHT 3 * PI / 2
+
+#define MSGLEN 3
+
+
 
 struct contextDataforClosing{
     void (*pFunction)(void *);
