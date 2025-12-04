@@ -6,10 +6,11 @@ void CheckEvents(int* running, GameState* game_state) {
     (void)game_state; //currently unused
 
     SDL_Event event;
-    SDL_PollEvent(&event);
-    if (event.type == SDL_QUIT) {
-        printf("Quit event received. Exiting...\n");
-        *running = 0;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            printf("Quit event received. Exiting...\n");
+            *running = 0;
+        }
     }
 }
 
