@@ -110,9 +110,8 @@ int main(int argc, char *argv[])
 
     if(!programContext) return -1;
 
-    Player *firstPlayer = malloc(sizeof(Player));
+    Player *firstPlayer = NULL;
     
-    if(!firstPlayer) return -1;
 
     u_int8_t msg;
     zmq_msg_t zmq_msg;
@@ -189,6 +188,10 @@ int main(int argc, char *argv[])
                         spaceships[0] = 1;
                         newID = (uint8_t)(rand() % 63);
                         game_state->n_ships++;
+
+                        firstPlayer = malloc(sizeof(Player));
+                        if(!firstPlayer) return -1;
+
                         *firstPlayer = (Player){newID, game_state -> n_ships, NULL};
                         msg = newID << 3;
                         nNewPlayers--;
@@ -207,19 +210,28 @@ int main(int argc, char *argv[])
                             //Verificar que quem mandou a mensagem pertence à player list,
                             //se pertencer guardar o pointer para o player
                         currPlayer = firstPlayer;
+                        printf("First player id %d, message sender id %d.\n", firstPlayer->ID, msgSenderID);
                         while(currPlayer != NULL){
                             if(currPlayer->ID == msgSenderID) break;
                             currPlayer = currPlayer->nextPlayer;
                         }
-
+                        printf("Endereço na player list da pessoa que pediu para sair %p.\n", currPlayer);
                             //Atualizar a lista de player para não conter o ex-player e libertar a menória por ele ocupada
                         if (currPlayer != NULL){
-                            Player *temp = currPlayer->nextPlayer;
-                            for(currPlayer = firstPlayer; currPlayer->nextPlayer->ID != msgSenderID; currPlayer = currPlayer->nextPlayer);
-                            spaceships[currPlayer->shipID - 1] = 0;
-                            free(currPlayer->nextPlayer);
-                            currPlayer->nextPlayer = temp;
+                            Player *temp = currPlayer;
+                            if(currPlayer == firstPlayer){
+                                firstPlayer = firstPlayer->nextPlayer;
+                            }else{
+                                for(currPlayer = firstPlayer; currPlayer->nextPlayer->ID != msgSenderID; currPlayer = currPlayer->nextPlayer);
+                                currPlayer->nextPlayer = temp->nextPlayer;
+                            }
+                            spaceships[temp->shipID - 1] = 0;
+                            free(temp);
                             msg = SUCCESS;
+
+
+
+                            printf("Finished updating msg list.\n");
                         } else {
                             //Message sender was not in player list
                             msg = FAIL;
@@ -316,7 +328,7 @@ int main(int argc, char *argv[])
         UpdateUniverse(game_state, DOESTRASHMOVE);
         Draw(renderer, game_state);
 
-
+        SDL_Delay(500);
     }
     
     //Clear Player list

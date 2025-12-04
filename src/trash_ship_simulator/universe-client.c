@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
             msg = MYSTILL;
         }
         
-        printf("Information to send is %d", msg);
+        printf("Information to send is %d.\n", msg);
         //Add comunication
         msg |= myID;
         protoMessage.ch.data = &msg;
@@ -150,8 +150,6 @@ int main(int argc, char *argv[])
         printf("Message sent %d.\n", msg);
 
         zmq_recv(sender, buffer, msg_len, 0);
-        
-
     }
 
     printf("closing.\n");
