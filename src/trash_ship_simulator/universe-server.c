@@ -166,10 +166,15 @@ int main(int argc, char *argv[])
                     default:
                         //Get an unused ID
                         newID = (uint8_t)(rand() % 31);
-                        for(currPlayer = firstPlayer; currPlayer; newID = (uint8_t)(rand() % 31))
-                            for(currPlayer = firstPlayer; currPlayer->ID != newID; currPlayer = currPlayer -> nextPlayer)
-                                if(currPlayer) break;
-                        
+                        printf("Entered default case.\n");
+                        for(currPlayer = firstPlayer; currPlayer; newID = (uint8_t)(rand() % 31)){
+                            currPlayer = firstPlayer;
+                            while(currPlayer){
+                                if(!currPlayer) break;
+                                currPlayer = currPlayer->nextPlayer;
+                            }
+                        }
+                        printf("Found an unused id.\n");
                         game_state ->n_ships++;
                         //Create a new player entity
                         Player *newPlayer = malloc(sizeof(Player));
@@ -330,6 +335,7 @@ int main(int argc, char *argv[])
             SDL_Delay(500);
 
             if(game_state->n_ships == 0) nNewPlayers = 1;
+            else nNewPlayers = 0;
 
         }
 
