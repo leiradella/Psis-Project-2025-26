@@ -14,11 +14,20 @@
 #define TRASH_RADIUS 4.0f
 
 #define SHIP_RADIUS 10.0f
+#define SHIP_SPEED 10.0f
 
 #define COLLISION_DISTANCE 1.0f
 
 //math constants
 #define PI 3.14159265f
+
+typedef enum Direction {
+    UP,
+    LEFT,
+    DOWN,
+    RIGHT,
+    INVALID_DIRECTION
+} Direction;
 
 //unvierse configuration structure
 typedef struct UniverseConfig {
@@ -44,12 +53,13 @@ typedef struct Vector {
 
 //Ship structure
 typedef struct Ship{
+    Direction direction;
     Position Position;
     float radius;
     int current_trash;
 
-    int planet_id;
-    char is_active;
+    char planet_id;
+    int is_active;
 }Ship;
 
 //planet structure
@@ -94,6 +104,8 @@ typedef struct GameState {
     int n_ships;
     int trash_ship_capacity;
 
+    int max_ships;
+
     int is_game_over;
 } GameState;
 
@@ -102,6 +114,9 @@ Vector MakeVector(float x, float y);
 
 //Vector addition
 Vector AddVectors(Vector v1, Vector v2);
+
+//initialize ship once a player connects into it
+void InitializeShip(GameState* game_state, int id);
 
 //this function reads universe parameters from the config file with name config_name
 //and stores them in universe_config

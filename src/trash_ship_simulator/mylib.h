@@ -18,7 +18,7 @@
 #define MYLEFT  1
 #define MYUP    0
 #define MYDOWN  2
-#define MYRIGHT 0
+#define MYRIGHT 3
 
 #define IDMASK  248
 #define CODEMASK 7

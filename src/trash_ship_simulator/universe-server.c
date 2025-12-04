@@ -121,14 +121,10 @@ int main(int argc, char *argv[])
 
     Player *currPlayer;
     uint8_t newID;
-    uint8_t spaceships[20];
 
     int nNewPlayers=1;
     int running = 1;
     int spaceshipNum;
-
-    for(spaceshipNum = 0; spaceshipNum<20;spaceshipNum++)
-        spaceships[spaceshipNum] = 0;
 
     while(running)
     {
@@ -170,13 +166,13 @@ int main(int argc, char *argv[])
                             for(currPlayer = firstPlayer; currPlayer->ID != newID; currPlayer = currPlayer -> nextPlayer)
                                 if(currPlayer) break;
                         
-                        game_state ->n_ships++;
+                        game_state->n_ships++;
                         //Create a new player entity
                         Player *newPlayer = malloc(sizeof(Player));
                         //Get an unused ship number
-                        for(spaceshipNum = 0; spaceships[spaceshipNum]==1; spaceshipNum++);
+                        for(spaceshipNum = 0; game_state->ships[spaceshipNum].is_active == 1; spaceshipNum++);
                         //Set unused ship as in use
-                        spaceships[spaceshipNum] = 1;
+                        InitializeShip(game_state, spaceshipNum);
                         //Create new player entity with the spaceship number considering there is no spaceship 0.
                         *newPlayer = (Player){newID, spaceshipNum+1, NULL};
                         for(currPlayer = firstPlayer; currPlayer->nextPlayer != NULL; currPlayer = currPlayer->nextPlayer);
@@ -187,9 +183,10 @@ int main(int argc, char *argv[])
                         //If Player list is empty
                     case 0:
                         //Fill the first entity
-                        spaceships[0] = 1;
+
                         newID = (uint8_t)(rand() % 31);
                         game_state->n_ships++;
+                        InitializeShip(game_state, 0);
                         nNewPlayers--;
                         firstPlayer = malloc(sizeof(Player));
                         if(!firstPlayer) return -1;
@@ -227,7 +224,7 @@ int main(int argc, char *argv[])
                                 for(currPlayer = firstPlayer; currPlayer->nextPlayer->ID != msgSenderID; currPlayer = currPlayer->nextPlayer);
                                 currPlayer->nextPlayer = temp->nextPlayer;
                             }
-                            spaceships[temp->shipID - 1] = 0;
+                            game_state->ships[temp->shipID - 1].is_active = 0;
                             free(temp);
                             msg = SUCCESS;
                             game_state->n_ships--;
@@ -259,6 +256,7 @@ int main(int argc, char *argv[])
                         {
                             spaceshipNum = currPlayer->shipID;
                             // game_state->planets[spaceshipNum].ship.velocity.amplitude=0;
+                            game_state->ships[spaceshipNum-1].direction = INVALID_DIRECTION;
                             msg = SUCCESS;
                         }else{
                             //Player Id doesn't exist
@@ -286,18 +284,33 @@ int main(int argc, char *argv[])
                             {
                             case MYUP:
                                 // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEUP;
+
+                                game_state->ships[spaceshipNum-1].direction = UP;
                                 break;
 
                             case MYLEFT:
                                 // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLELEFT;
+
+                                game_state->ships[spaceshipNum-1].direction = LEFT;
                                 break;
 
                             case MYDOWN:
                                 // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEDOWN;
+
+
+                                game_state->ships[spaceshipNum-1].direction = DOWN;
+                                break;
+                            
+                            case MYRIGHT:
+                                // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLERIGHT;
+
+                                game_state->ships[spaceshipNum-1].direction = RIGHT;
                                 break;
 
                             default:
                                 // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLERIGHT;
+
+                                game_state->ships[spaceshipNum-1].direction = RIGHT;
                                 break;
                             }
                             printf("Corrigir ângulos? universe.server linha 250 \n");
@@ -327,7 +340,6 @@ int main(int argc, char *argv[])
             zmq_send(pReceive, buffer, MSGLEN, 0);
             printf("Sent response to client.\n");
             printf("i = %d number of messages to read = %d\n", i, game_state->n_ships + nNewPlayers);
-            SDL_Delay(500);
 
             if(game_state->n_ships == 0) nNewPlayers = 1;
 

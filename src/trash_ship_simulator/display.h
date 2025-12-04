@@ -6,10 +6,6 @@
 
 #include "universe-data.h"
 
-//internal draw functions for each object type in the game state
-void _DrawPlanets(SDL_Renderer* renderer, GameState* game_state);
-void _DrawTrash(SDL_Renderer* renderer, GameState* game_state);
-
 //draw function
 void Draw(SDL_Renderer* renderer, GameState* game_state);
 

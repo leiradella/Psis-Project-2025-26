@@ -28,6 +28,21 @@ Vector AddVectors(Vector v1, Vector v2) {
     return MakeVector(x_total, y_total);
 }
 
+void InitializeShip(GameState* game_state, int id) {
+    if (id < 0 || id >= game_state->n_ships) {
+        printf("Invalid ship ID %d for initialization.\n", id);
+        return;
+    }
+
+    game_state->ships[id].is_active = 1;
+
+    //Set initial position to the corresponding planet's position
+    game_state->ships[id].Position.x = game_state->planets[id].position.x;
+    game_state->ships[id].Position.y = game_state->planets[id].position.y;
+    
+    game_state->ships[id].current_trash = 0;
+}
+
 int _GetUniverseParameters(const char* config_name, UniverseConfig* universe_config) {
     //init and read config file
     config_t cfg;
@@ -227,6 +242,8 @@ Ship* _InitializeShips(int n_ships, int trash_ship_capacity) {
         ships[i].planet_id = 'A' + i; //each ship starts at its corresponding planet
         ships[i].is_active = 0; //ships start inactive
 
+        ships[i].direction = INVALID_DIRECTION;
+
         //invalid initial position
         ships[i].Position.x = -100.0f;
         ships[i].Position.y = -100.0f;
@@ -271,7 +288,8 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     game_state->n_trashes = universe_config.starting_trash;
     game_state->max_trash = universe_config.max_trash;
     game_state->ships = ships;
-    game_state->n_ships = universe_config.n_planets;
+    game_state->n_ships = 0;
+    game_state->max_ships = universe_config.n_planets;
     game_state->trash_ship_capacity = universe_config.trash_ship_capacity;
     game_state->is_game_over = 0;
 

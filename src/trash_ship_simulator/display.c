@@ -61,6 +61,16 @@ void _DrawTrash(SDL_Renderer* renderer, GameState* game_state) {
     }
 }
 
+void _DrawShips(SDL_Renderer* renderer, GameState* game_state) {
+
+    for (int i = 0; i < game_state->n_ships; i++) {
+        if (game_state->ships[i].is_active) {
+            //draw ship as a small green circle
+            filledCircleRGBA(renderer, (int)game_state->ships[i].Position.x, (int)game_state->ships[i].Position.y, (int)game_state->ships[i].radius, 0, 255, 0, 255);
+        }
+    }
+}
+
 void _DrawGameOver(SDL_Renderer* renderer, GameState* game_state) {
 
     if(game_state->is_game_over == 0) {
@@ -110,6 +120,7 @@ void Draw(SDL_Renderer* renderer, GameState* game_state) {
     //for each of the GameStates object vectors, we make a draw loop.
     _DrawPlanets(renderer, game_state);
     _DrawTrash(renderer, game_state);
+    _DrawShips(renderer, game_state);
     _DrawGameOver(renderer, game_state);
 
     //present the rendered frame

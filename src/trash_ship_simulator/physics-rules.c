@@ -101,6 +101,34 @@ void _UpdateTrash(GameState* game_state) {
 
 }
 
+void _UpdateShips(GameState* game_state) {
+    (void)game_state;
+
+    //get direction and update position accordingly
+    for (int i = 0; i < game_state->max_ships; i++) {
+        if (!game_state->ships[i].is_active) {
+            return;
+        }
+
+        switch (game_state->ships[i].direction) {
+            case UP:
+                game_state->ships[i].Position.y -= SHIP_SPEED;
+                break;
+            case DOWN:
+                game_state->ships[i].Position.y += SHIP_SPEED;
+                break;
+            case LEFT:
+                game_state->ships[i].Position.x -= SHIP_SPEED;
+                break;
+            case RIGHT:
+                game_state->ships[i].Position.x += SHIP_SPEED;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void _CheckGameOver(GameState* game_state) {
 
     //once the trash hits the max, its game over
@@ -115,6 +143,8 @@ void UpdateUniverse(GameState* game_state, int trashMovement) {
     _UpdatePlanets(game_state);
     if(trashMovement)
         _UpdateTrash(game_state);
+
+    _UpdateShips(game_state);
 
     _CheckGameOver(game_state);
 }

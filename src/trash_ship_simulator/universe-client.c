@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
             msg = MYLEFT;
         } else if(currentKeyStates[SDL_SCANCODE_S]||currentKeyStates[SDL_SCANCODE_DOWN]){
             msg = MYDOWN;
-        } else if(currentKeyStates[SDL_SCANCODE_D]||currentKeyStates[SDL_SCANCODE_D]){
+        } else if(currentKeyStates[SDL_SCANCODE_D]||currentKeyStates[SDL_SCANCODE_RIGHT]){
             msg = MYRIGHT;
         } else {
             msg = MYSTILL;
