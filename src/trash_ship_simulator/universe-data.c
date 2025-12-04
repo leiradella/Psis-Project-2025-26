@@ -144,15 +144,6 @@ Planet *_InitializePlanets(int n_planets, int universe_size, int seed) {
         planets[i].radius = PLANET_RADIUS;
         planets[i].trash_amount = INITIAL_TRASH_AMOUNT;
         planets[i].name = 'A' + i; //assign names like A B C...
-        //Make function
-        planets[i].ship.acceleration.amplitude=0;
-        planets[i].ship.acceleration.angle=0;
-        planets[i].ship.mass=0;
-        planets[i].ship.Position.x=0;
-        planets[i].ship.Position.y=0;
-        planets[i].ship.radius=0;
-        planets[i].ship.velocity.amplitude = 0;
-        planets[i].ship.velocity.angle = 0;
 
         //initialize positions with invalid values
         planets[i].position.x = -100.0f;
@@ -225,6 +216,25 @@ Trash *_InitializeTrash(int n_trashes, int universe_size, int seed) {
     return trashes;
 }
 
+Ship* _InitializeShips(int n_ships, int trash_ship_capacity) {
+    //create ship vector
+    Ship* ships = (Ship*)malloc(n_ships * sizeof(Ship));
+
+    //initialize ship properties
+    for (int i = 0; i < n_ships; i++) {
+        ships[i].radius = SHIP_RADIUS;
+        ships[i].current_trash = 0;
+        ships[i].planet_id = 'A' + i; //each ship starts at its corresponding planet
+        ships[i].is_active = 0; //ships start inactive
+
+        //invalid initial position
+        ships[i].Position.x = -100.0f;
+        ships[i].Position.y = -100.0f;
+    }
+
+    return ships;
+}
+
 GameState *CreateInitialUniverseState(const char* config_name, int seed) {
 
     //create a universe config struct with the parameters
@@ -249,6 +259,9 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     //initialize the trash
     Trash *trashes = _InitializeTrash(universe_config.max_trash, universe_config.universe_size, seed);
 
+    //initialize ships
+    Ship* ships = _InitializeShips(universe_config.n_planets, universe_config.trash_ship_capacity);
+
     //gamestate struct to return
     GameState* game_state = malloc(sizeof(GameState));
     game_state->universe_size = universe_config.universe_size;
@@ -257,6 +270,9 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     game_state->trashes = trashes;
     game_state->n_trashes = universe_config.starting_trash;
     game_state->max_trash = universe_config.max_trash;
+    game_state->ships = ships;
+    game_state->n_ships = universe_config.n_planets;
+    game_state->trash_ship_capacity = universe_config.trash_ship_capacity;
     game_state->is_game_over = 0;
 
     return game_state;

@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
                         if(currPlayer)
                         {
                             spaceshipNum = currPlayer->shipID;
-                            game_state->planets[spaceshipNum].ship.velocity.amplitude=0;
+                            // game_state->planets[spaceshipNum].ship.velocity.amplitude=0;
                             msg = SUCCESS;
                         }else{
                             //Player Id doesn't exist
@@ -281,23 +281,23 @@ int main(int argc, char *argv[])
                         if(currPlayer)
                         {
                             spaceshipNum = currPlayer->shipID;
-                            game_state->planets[spaceshipNum].ship.velocity.amplitude=SPACESHIPSPEED;
+                            // game_state->planets[spaceshipNum].ship.velocity.amplitude=SPACESHIPSPEED;
                             switch (msg & CODEMASK)
                             {
                             case MYUP:
-                                game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEUP;
+                                // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEUP;
                                 break;
 
                             case MYLEFT:
-                                game_state->planets[spaceshipNum].ship.velocity.angle = ANGLELEFT;
+                                // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLELEFT;
                                 break;
 
                             case MYDOWN:
-                                game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEDOWN;
+                                // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLEDOWN;
                                 break;
 
                             default:
-                                game_state->planets[spaceshipNum].ship.velocity.angle = ANGLERIGHT;
+                                // game_state->planets[spaceshipNum].ship.velocity.angle = ANGLERIGHT;
                                 break;
                             }
                             printf("Corrigir ângulos? universe.server linha 250 \n");

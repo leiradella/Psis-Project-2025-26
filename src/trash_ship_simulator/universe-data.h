@@ -2,6 +2,7 @@
 #define UNIVERSE_DATA_H
 
 #include <libconfig.h>
+#include <stdint.h>
 
 //default values for universe objects
 #define PLANET_MASS 10
@@ -11,6 +12,8 @@
 
 #define TRASH_MASS 1
 #define TRASH_RADIUS 4.0f
+
+#define SHIP_RADIUS 10.0f
 
 #define COLLISION_DISTANCE 1.0f
 
@@ -42,10 +45,11 @@ typedef struct Vector {
 //Ship structure
 typedef struct Ship{
     Position Position;
-    Vector velocity;
-    Vector acceleration;
-    int mass;
     float radius;
+    int current_trash;
+
+    int planet_id;
+    char is_active;
 }Ship;
 
 //planet structure
@@ -55,7 +59,6 @@ typedef struct Planet {
     int mass;
     float radius;
     int trash_amount;
-    Ship ship;
 } Planet;
 
 //trash structure
@@ -78,13 +81,18 @@ typedef struct Player
 
 //game state structure (so that we dont pass too many parameters on the main loop)
 typedef struct GameState {
+    
     int universe_size;
     Planet* planets;
     int n_planets;
+    
     Trash *trashes;
     int n_trashes;
     int max_trash;
+
+    Ship* ships;
     int n_ships;
+    int trash_ship_capacity;
 
     int is_game_over;
 } GameState;
