@@ -153,20 +153,22 @@ int main(int argc, char *argv[])
                 if(msg == GETID){
                     //Handling new player requests
                     printf("Received a GETID message.\n");
-                    nNewPlayers++;
+                    printf("Number of ships is %d.\n", game_state->n_ships);
                     switch (game_state->n_ships)
                     {
                         //If Player list is full
                     case 20:
                         msg = MAXPLAYERS;
+                        nNewPlayers++;
                         break;
 
                         //If player list is partialy filled
                     default:
                         //Get an unused ID
-                        newID = (uint8_t)(rand() % 63);
-                        for(currPlayer = firstPlayer; currPlayer; newID = (uint8_t)(rand() % 63))
-                            for(currPlayer = firstPlayer; currPlayer->ID != newID;currPlayer = currPlayer -> nextPlayer);
+                        newID = (uint8_t)(rand() % 31);
+                        for(currPlayer = firstPlayer; currPlayer; newID = (uint8_t)(rand() % 31))
+                            for(currPlayer = firstPlayer; currPlayer->ID != newID; currPlayer = currPlayer -> nextPlayer)
+                                if(currPlayer) break;
                         
                         game_state ->n_ships++;
                         //Create a new player entity
@@ -186,18 +188,18 @@ int main(int argc, char *argv[])
                     case 0:
                         //Fill the first entity
                         spaceships[0] = 1;
-                        newID = (uint8_t)(rand() % 63);
+                        newID = (uint8_t)(rand() % 31);
                         game_state->n_ships++;
-
+                        nNewPlayers--;
                         firstPlayer = malloc(sizeof(Player));
                         if(!firstPlayer) return -1;
 
                         *firstPlayer = (Player){newID, game_state -> n_ships, NULL};
                         msg = newID << 3;
-                        nNewPlayers--;
                         break;
                     }
                 }else{
+                    printf("Not a getid msg.\n");
                     //Handling all other messages
                     //Get the sender ID
                     int8_t msgSenderID = (msg & IDMASK) >> 3;
@@ -228,15 +230,18 @@ int main(int argc, char *argv[])
                             spaceships[temp->shipID - 1] = 0;
                             free(temp);
                             msg = SUCCESS;
-
-
+                            game_state->n_ships--;
 
                             printf("Finished updating msg list.\n");
                         } else {
                             //Message sender was not in player list
                             msg = FAIL;
-                            nNewPlayers++;
+                            
                         }
+                        //Add temporary players so this loop does't skip last attended client 
+                        //(note: if msg wasnt from client it works because it ignores the face 
+                        //user and if a user was destroyed it doesn't shorten the get all client messages loop before intended)
+                        nNewPlayers++;
 
                     }
                     //Received a message to not move the spaceship
@@ -321,6 +326,11 @@ int main(int argc, char *argv[])
             
             zmq_send(pReceive, buffer, MSGLEN, 0);
             printf("Sent response to client.\n");
+            printf("i = %d number of messages to read = %d\n", i, game_state->n_ships + nNewPlayers);
+            SDL_Delay(500);
+
+            if(game_state->n_ships == 0) nNewPlayers = 1;
+
         }
 
 
@@ -328,7 +338,7 @@ int main(int argc, char *argv[])
         UpdateUniverse(game_state, DOESTRASHMOVE);
         Draw(renderer, game_state);
 
-        SDL_Delay(500);
+        SDL_Delay(16);
     }
     
     //Clear Player list
