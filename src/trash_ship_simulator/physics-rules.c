@@ -102,14 +102,12 @@ void _UpdateTrash(GameState* game_state) {
 }
 
 void _UpdateShips(GameState* game_state) {
-    (void)game_state;
-
-    //get direction and update position accordingly
     for (int i = 0; i < game_state->max_ships; i++) {
         if (!game_state->ships[i].is_active) {
-            return;
+            continue;
         }
 
+        //update position based on direction
         switch (game_state->ships[i].direction) {
             case UP:
                 game_state->ships[i].Position.y -= SHIP_SPEED;
@@ -125,6 +123,90 @@ void _UpdateShips(GameState* game_state) {
                 break;
             default:
                 break;
+        }
+
+
+        //loop around the universe edges
+        if (game_state->ships[i].Position.x < 0) {
+            game_state->ships[i].Position.x += game_state->universe_size;
+        }
+        else if (game_state->ships[i].Position.x > game_state->universe_size) {
+            game_state->ships[i].Position.x -= game_state->universe_size;
+        }
+
+        if (game_state->ships[i].Position.y < 0) {
+            game_state->ships[i].Position.y += game_state->universe_size;
+        }
+        else if (game_state->ships[i].Position.y > game_state->universe_size) {
+            game_state->ships[i].Position.y -= game_state->universe_size;
+        }
+
+        //check for trash collision
+        for (int j = 0; j < game_state->n_trashes; j++) {
+            float dx = game_state->ships[i].Position.x - game_state->trashes[j].position.x;
+            float dy = game_state->ships[i].Position.y - game_state->trashes[j].position.y;
+            float distance = sqrt(dx * dx + dy * dy);
+            if (distance < game_state->ships[i].radius + game_state->trashes[j].radius) {
+                //collect trash if ship has capacity
+                if (game_state->ships[i].current_trash < game_state->trash_ship_capacity) {
+                    game_state->ships[i].current_trash++;
+                    //remove trash from universe by replacing it with the last trash
+                    game_state->trashes[j] = game_state->trashes[game_state->n_trashes - 1];
+                    game_state->n_trashes--;
+                    j--; //check this index again as it has new trash now
+                }
+            }
+        }
+
+        //check for planet delivery (can only deliver to its own planet)
+        for (int j = 0; j < game_state->n_planets; j++) {
+            float dx = game_state->ships[i].Position.x - game_state->planets[j].position.x;
+            float dy = game_state->ships[i].Position.y - game_state->planets[j].position.y;
+            float distance = sqrt(dx * dx + dy * dy);
+            if (distance < game_state->ships[i].radius + game_state->planets[j].radius) {
+
+                //check if ship is at its own planet
+                if (game_state->ships[i].planet_id == game_state->planets[j].name) {
+                    //deliver all trash
+                    game_state->planets[j].trash_amount += game_state->ships[i].current_trash;
+                    game_state->ships[i].current_trash = 0;
+                    break;
+                } else {
+                    if (game_state->ships[i].current_trash == 0) {
+                        break; //no trash to spill
+                    }
+
+                    //crash into wrong planet, making more trash
+                    int trash_created = game_state->ships[i].current_trash + 1;
+
+                    //spill all trash and create an extra one, in random directions
+                    for (int k = 0; k < trash_created; k++) {
+                        if (game_state->n_trashes >= game_state->max_trash) {
+                            break; //stop creating trash if at max
+                        }
+
+                        float angle = (float)(rand() % 360);
+
+                        Trash new_trash;
+                        new_trash.position.x = (float)(rand() % game_state->universe_size);
+                        new_trash.position.y = (float)(rand() % game_state->universe_size);
+                        new_trash.velocity.amplitude = 0.0f;
+                        new_trash.velocity.angle = 0.0f;
+                        new_trash.acceleration.amplitude = 0.0f;
+                        new_trash.acceleration.angle = 0.0f;
+                        new_trash.mass = TRASH_MASS;
+                        new_trash.radius = TRASH_RADIUS;
+                        
+
+                        game_state->trashes[game_state->n_trashes] = new_trash;
+                        game_state->n_trashes++;
+                    }
+
+                    game_state->ships[i].current_trash = 0;
+
+                    break;
+                }
+            }
         }
     }
 }
