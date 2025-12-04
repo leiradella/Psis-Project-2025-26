@@ -144,6 +144,15 @@ Planet *_InitializePlanets(int n_planets, int universe_size, int seed) {
         planets[i].radius = PLANET_RADIUS;
         planets[i].trash_amount = INITIAL_TRASH_AMOUNT;
         planets[i].name = 'A' + i; //assign names like A B C...
+        //Make function
+        planets[i].ship.acceleration.amplitude=0;
+        planets[i].ship.acceleration.angle=0;
+        planets[i].ship.mass=0;
+        planets[i].ship.Position.x=0;
+        planets[i].ship.Position.y=0;
+        planets[i].ship.radius=0;
+        planets[i].ship.velocity.amplitude = 0;
+        planets[i].ship.velocity.angle = 0;
 
         //initialize positions with invalid values
         planets[i].position.x = -100.0f;

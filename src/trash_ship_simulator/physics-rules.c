@@ -110,10 +110,11 @@ void _CheckGameOver(GameState* game_state) {
     }
 }
 
-void UpdateUniverse(GameState* game_state) {
+void UpdateUniverse(GameState* game_state, int trashMovement) {
     //update each object vector in the game state
     _UpdatePlanets(game_state);
-    _UpdateTrash(game_state);
+    if(trashMovement)
+        _UpdateTrash(game_state);
 
     _CheckGameOver(game_state);
 }

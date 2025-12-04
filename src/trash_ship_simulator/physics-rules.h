@@ -17,6 +17,6 @@ void _NewTrashVelocity(GameState* game_state);
 void _NewTrashPosition(GameState* game_state);
 
 //universe update function
-void UpdateUniverse(GameState* game_state);
+void UpdateUniverse(GameState* game_state, int trashMovement);
 
 #endif

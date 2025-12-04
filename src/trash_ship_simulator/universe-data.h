@@ -39,6 +39,15 @@ typedef struct Vector {
     float angle;
 } Vector;
 
+//Ship structure
+typedef struct Ship{
+    Position Position;
+    Vector velocity;
+    Vector acceleration;
+    int mass;
+    float radius;
+}Ship;
+
 //planet structure
 typedef struct Planet {
     char name;
@@ -46,6 +55,7 @@ typedef struct Planet {
     int mass;
     float radius;
     int trash_amount;
+    Ship ship;
 } Planet;
 
 //trash structure
@@ -57,6 +67,15 @@ typedef struct Trash {
     float radius;
 } Trash;
 
+//Player structure
+typedef struct Player
+{
+    int8_t ID;
+    int shipID;
+    struct Player *nextPlayer;
+}Player;
+
+
 //game state structure (so that we dont pass too many parameters on the main loop)
 typedef struct GameState {
     int universe_size;
@@ -65,6 +84,7 @@ typedef struct GameState {
     Trash *trashes;
     int n_trashes;
     int max_trash;
+    int n_ships;
 
     int is_game_over;
 } GameState;
