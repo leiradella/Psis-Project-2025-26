@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
     //Socket to send messages to
     void *sender = zmq_socket(pContext, ZMQ_REQ);
-    zmq_connect(sender, "ipc:///tmp/s1");
+    zmq_connect(sender, "tcp://localhost:5556");
 
     if(!sender){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     uint8_t *buffer = (uint8_t *)malloc(msg_len);
     client__pack(&protoMessage, buffer);
     printf("Sent request for ID of size %d.\n", msg_len);
+
     zmq_send(sender, buffer, msg_len, 0);
 
         //Process server reponse to ship request
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
             msg = MYSTILL;
         }
         
+        printf("Information to send is %d", msg);
         //Add comunication
         msg |= myID;
         protoMessage.ch.data = &msg;
@@ -145,7 +147,7 @@ int main(int argc, char *argv[])
         client__pack(&protoMessage, buffer);
                 
         zmq_send(sender, buffer, msg_len, 0);
-        printf("Message sent %c.\n", msg);
+        printf("Message sent %d.\n", msg);
 
         zmq_recv(sender, buffer, msg_len, 0);
         

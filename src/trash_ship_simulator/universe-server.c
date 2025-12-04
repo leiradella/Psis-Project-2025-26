@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 
     //Socket to send messages to
     void *pReceive = zmq_socket(pContext, ZMQ_REP);
-    zmq_bind(pReceive, "ipc:///tmp/s1");
+    zmq_bind(pReceive, "tcp://*:5556");
 
     if(!pReceive){
         printf("error initializing ZMQ: %s\n", zmq_strerror(errno));
@@ -115,7 +115,10 @@ int main(int argc, char *argv[])
     if(!firstPlayer) return -1;
 
     u_int8_t msg;
+    zmq_msg_t zmq_msg;
+    zmq_msg_init(&zmq_msg);
     uint8_t *buffer = (uint8_t *)malloc(MSGLEN);
+
 
     Player *currPlayer;
     uint8_t newID;
@@ -132,17 +135,25 @@ int main(int argc, char *argv[])
     {
         for(int i = 0; i < game_state->n_ships + nNewPlayers; i++){
             printf("Waiting for Message\n");
-            zmq_recv(pReceive, buffer, MSGLEN, 0);
-            Client *protoMessage = client__unpack(NULL, MSGLEN, buffer);
-            printf("Received message at %p\n", protoMessage);
+            int msg_len = zmq_recvmsg(pReceive, &zmq_msg , 0);
+            if(msg_len == -1){
+                printf("Error getting ZMQ message: %s\n", zmq_strerror(errno));
+                return -1;
+            }
+            printf("Received message of lenght %d.\n", msg_len);
+            void *msg_data = zmq_msg_data(&zmq_msg);
+            printf("Retrieved data stored at %p.\n", msg_data);
+            Client *protoMessageRecv = client__unpack(NULL, msg_len, msg_data);
+            printf("Stored information unpacked to %p.\n", protoMessageRecv);
 
-            if(protoMessage){
-                msg = *(protoMessage->ch.data);
-                printf("Going to free Message");
-                client__free_unpacked(protoMessage, NULL);
+            if(protoMessageRecv){
+                printf("Valid unnpack address.\n");
+                msg = *(protoMessageRecv->ch.data);
+                client__free_unpacked(protoMessageRecv, NULL);
                 
                 if(msg == GETID){
                     //Handling new player requests
+                    printf("Received a GETID message.\n");
                     nNewPlayers++;
                     switch (game_state->n_ships)
                     {
@@ -190,6 +201,8 @@ int main(int argc, char *argv[])
                     
                     //Received a message to Exit the game
                     if((msg & CODEMASK) == 7){
+                        printf("Received a exit message.\n");
+
                         //Remove Player entity with corresponding id from player list.
                             //Verificar que quem mandou a mensagem pertence à player list,
                             //se pertencer guardar o pointer para o player
@@ -216,6 +229,7 @@ int main(int argc, char *argv[])
                     }
                     //Received a message to not move the spaceship
                     else if ((msg & CODEMASK) == 4){
+                        printf("Received a NOMOVE message.\n");
                         //Colocar na informação da spaceship speed 0
                             //Verificar que quem mandou a mensagem pertence à player list,
                             //se pertencer guardar o pointer para o player
@@ -238,6 +252,7 @@ int main(int argc, char *argv[])
 
                     //Received a message to move a spaceship
                     } else if ((msg & CODEMASK) < 4){
+                        printf("Received a MOVE message.\n");
                         //Colocar na informação da spaceship speed e angle
                             //Verificar que quem mandou a mensagem pertence à player list,
                             //se pertencer guardar o pointer para o player
@@ -279,16 +294,21 @@ int main(int argc, char *argv[])
 
                 }
 
-            }else {msg = 0; //Failed to read message
+            }else {
+                printf("Invalid message unpack adress.\n");
+                client__free_unpacked(protoMessageRecv, NULL);
+                msg = 0; //Failed to read message
                 nNewPlayers++;
             }
+            
+            Client protoMessageSend = CLIENT__INIT;
+            protoMessageSend.ch.data = &msg;
+            protoMessageSend.ch.len = 1;
 
-            protoMessage->ch.data = &msg;
-            protoMessage->ch.len = 1;
-
-            client__pack(protoMessage, buffer);
+            client__pack(&protoMessageSend, buffer);
+            
             zmq_send(pReceive, buffer, MSGLEN, 0);
-
+            printf("Sent response to client.\n");
         }
 
 
@@ -307,6 +327,7 @@ int main(int argc, char *argv[])
         free(temp);
     }
 
+    zmq_msg_close(&zmq_msg);
     free(buffer);
     closeContexts(programContext);
     return 0;
