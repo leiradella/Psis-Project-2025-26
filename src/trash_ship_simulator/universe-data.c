@@ -231,7 +231,7 @@ Trash *_InitializeTrash(int n_trashes, int universe_size, int seed) {
     return trashes;
 }
 
-Ship* _InitializeShips(int n_ships, int trash_ship_capacity) {
+Ship* _InitializeShips(int n_ships, int trash_ship_capacity, Planet* planets) {
     //create ship vector
     Ship* ships = (Ship*)malloc(n_ships * sizeof(Ship));
 
@@ -244,9 +244,9 @@ Ship* _InitializeShips(int n_ships, int trash_ship_capacity) {
 
         ships[i].direction = INVALID_DIRECTION;
 
-        //invalid initial position
-        ships[i].Position.x = -100.0f;
-        ships[i].Position.y = -100.0f;
+        //initialize with their respective planet positions
+        ships[i].Position.x = planets[i].position.x;
+        ships[i].Position.y = planets[i].position.y;
     }
 
     return ships;
@@ -277,7 +277,7 @@ GameState *CreateInitialUniverseState(const char* config_name, int seed) {
     Trash *trashes = _InitializeTrash(universe_config.max_trash, universe_config.universe_size, seed);
 
     //initialize ships
-    Ship* ships = _InitializeShips(universe_config.n_planets, universe_config.trash_ship_capacity);
+    Ship* ships = _InitializeShips(universe_config.n_planets, universe_config.trash_ship_capacity, planets);
 
     //gamestate struct to return
     GameState* game_state = malloc(sizeof(GameState));

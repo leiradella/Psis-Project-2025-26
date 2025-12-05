@@ -148,6 +148,9 @@ void _PositionTrash(Trash* trashes, int n_trashes, int universe_size, int seed);
 //initialize all trash with default values (mass, radius, position, velocity)
 Trash* _InitializeTrash(int n_trashes, int universe_size, int seed);
 
+//initialize all ships with default values (radius, position, current trash, planet id)
+Ship* _InitializeShips(int n_ships, int trash_ship_capacity, Planet* planets);
+
 //create the universe initial state using the universe configuration
 //this function is the only public function related to universe data reading
 GameState* CreateInitialUniverseState(const char* config_name, int seed);

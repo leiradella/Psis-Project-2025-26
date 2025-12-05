@@ -1,4 +1,5 @@
 #include "display.h"
+#include "Communication.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,7 +64,7 @@ void _DrawTrash(SDL_Renderer* renderer, GameState* game_state) {
 
 void _DrawShips(SDL_Renderer* renderer, GameState* game_state) {
 
-    for (int i = 0; i < game_state->n_ships; i++) {
+    for (int i = 0; i < game_state->max_ships; i++) {
         if (game_state->ships[i].is_active) {
             //draw ship as a small green circle
             filledCircleRGBA(renderer, (int)game_state->ships[i].Position.x, (int)game_state->ships[i].Position.y, (int)game_state->ships[i].radius, 0, 255, 0, 255);
@@ -125,4 +126,101 @@ void Draw(SDL_Renderer* renderer, GameState* game_state) {
 
     //present the rendered frame
     SDL_RenderPresent(renderer);
+}
+
+int checkQuit(){
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event) != 0)
+        if(event.type == SDL_QUIT) return 1;
+
+    return 0;
+    
+}
+
+uint8_t checkKeyboard(int close){
+    uint8_t msg;
+    const Uint8 *currentKeyStates = SDL_GetKeyboardState(NULL);
+    if (close == 1){
+        msg = ISDC;
+    } else if(currentKeyStates[SDL_SCANCODE_W]||currentKeyStates[SDL_SCANCODE_UP]){
+        msg = MYUP;
+    } else if(currentKeyStates[SDL_SCANCODE_A]||currentKeyStates[SDL_SCANCODE_LEFT]){
+        msg = MYLEFT;
+    } else if(currentKeyStates[SDL_SCANCODE_S]||currentKeyStates[SDL_SCANCODE_DOWN]){
+        msg = MYDOWN;
+    } else if(currentKeyStates[SDL_SCANCODE_D]||currentKeyStates[SDL_SCANCODE_RIGHT]){
+        msg = MYRIGHT;
+    } else {
+        msg = MYSTILL;
+    }
+    return msg;
+}
+
+SDL_Window *safe_SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint8 flags, gful_lifo **graceful_lifo){
+    SDL_Window *pWin = SDL_CreateWindow(title, x, y, w, h, flags);
+
+    if(!pWin){
+        printf("error initializing SDL: %s\n", SDL_GetError());
+        closeContexts(*graceful_lifo);
+        exit(1);
+    }
+    createContextDataforClosing(SDL_DestroyWindow, pWin, graceful_lifo);
+    return pWin;
+}
+
+void safe_SDL_Init(Uint32 flags, gful_lifo **gracefull_lifo){
+    if(SDL_Init(flags) != 0){
+        printf("error initializing SDL: %s\n", SDL_GetError());
+        closeContexts(*gracefull_lifo);
+        exit(1);
+    }
+    createContextDataforClosing(SDL_Quit, NULL, gracefull_lifo);
+}
+
+void safe_TTF_Init(gful_lifo **graceful_lifo){
+    if (TTF_Init() != 0) {
+        printf("TTF_Init Error: %s\n", TTF_GetError());
+        closeContexts(*graceful_lifo);
+        exit(1);
+    }
+}
+
+SDL_Renderer *safe_SDL_CreateRenderer(  SDL_Window * window,
+                                        int index, Uint32 flags,
+                                        gful_lifo **graceful_lifo){
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+                                 
+    if (renderer == NULL) {
+        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
+        closeContexts(*graceful_lifo);
+        exit(1);
+    }
+    createContextDataforClosing(SDL_DestroyRenderer, renderer, graceful_lifo);
+    return renderer;
+    }
+
+SDL_Window *createClientWindow(gful_lifo **gracefull_lifo){
+    return safe_SDL_CreateWindow("ShipClient",
+                                        SDL_WINDOWPOS_CENTERED, 
+                                        SDL_WINDOWPOS_CENTERED,
+                                        100, 100, 0,
+                                        gracefull_lifo);
+}
+
+SDL_Window *createServerWindow(GameState *game_state, gful_lifo **gracefull_lifo){
+    return safe_SDL_CreateWindow(   "Universe Simulator", 
+                                    SDL_WINDOWPOS_CENTERED, 
+                                    SDL_WINDOWPOS_CENTERED, 
+                                    game_state->universe_size, 
+                                    game_state->universe_size, 
+                                    SDL_WINDOW_SHOWN,
+                                    gracefull_lifo);
+}
+
+SDL_Renderer *createServerRenderer(SDL_Window *window, gful_lifo **gracefull_life){
+    return safe_SDL_CreateRenderer( window, -1, 
+                                    SDL_RENDERER_ACCELERATED, 
+                                    gracefull_life);
 }
