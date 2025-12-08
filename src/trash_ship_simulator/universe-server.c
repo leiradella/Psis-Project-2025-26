@@ -14,7 +14,7 @@
 
 #include "Communication.h"      //Adicionar a outras bibliotecas.
 
-#define DOESTRASHMOVE 0     //0 for no and 1 for yes
+#define DOESTRASHMOVE 0         //0 for no and 1 for yes
 
 int main(int argc, char *argv[])
 {
@@ -45,13 +45,23 @@ int main(int argc, char *argv[])
         void *pReceive = safe_zmq_socket(pContext, ZMQ_REP, &programContext);
         safe_zmq_bind(pReceive, "tcp://*:5556", &programContext);
 
+    //Init shipsGraphics
 
-    /*****************************+*/
+    SDL_Texture *imageTexture = getTexture(renderer, "Spaceship_resized.png", &programContext);
+    printf("return %p\n", imageTexture);
+
+    for(int i = 0; i < game_state->n_planets; i++){
+        game_state->ships[i].imageTexture=imageTexture;
+        printf("%p\n", game_state->ships[i].imageTexture);
+
+    }
+
+    /******************************/
     /*Program*/
 
     Player *firstPlayer = NULL;
 
-    u_int8_t msg;
+    uint8_t msg;
     zmq_msg_t zmq_msg;
     zmq_msg_init(&zmq_msg);
     uint8_t *buffer = (uint8_t *)malloc(MSGLEN);

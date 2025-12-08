@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <SDL2/SDL_image.h>
 
 #include <libconfig.h>
 
@@ -234,7 +235,7 @@ Trash *_InitializeTrash(int n_trashes, int universe_size, int seed) {
 Ship* _InitializeShips(int n_ships, int trash_ship_capacity, Planet* planets) {
     //create ship vector
     Ship* ships = (Ship*)malloc(n_ships * sizeof(Ship));
-
+    
     //initialize ship properties
     for (int i = 0; i < n_ships; i++) {
         ships[i].radius = SHIP_RADIUS;
@@ -243,6 +244,8 @@ Ship* _InitializeShips(int n_ships, int trash_ship_capacity, Planet* planets) {
         ships[i].is_active = 0; //ships start inactive
 
         ships[i].direction = INVALID_DIRECTION;
+
+        ships[i].imageTexture = NULL;
 
         //initialize with their respective planet positions
         ships[i].Position.x = planets[i].position.x;

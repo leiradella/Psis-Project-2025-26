@@ -9,7 +9,7 @@
 #include "physics-rules.h"
 #include "display.h"
 
-int main() {
+int main(void) {
 
     //seed random number generator with current time
     srand(time(NULL));
