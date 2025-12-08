@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL2/SDL_image.h>
 
 void _DrawPlanets(SDL_Renderer* renderer, GameState* game_state) {
 
@@ -27,7 +28,7 @@ void _DrawPlanets(SDL_Renderer* renderer, GameState* game_state) {
         char name_text[10];
         snprintf(name_text, sizeof(name_text), "%c%d", game_state->planets[i].name, game_state->planets[i].trash_amount);
         SDL_Color textColor = {0, 0, 0, 255}; //black color
-        
+
         SDL_Surface* textSurface = TTF_RenderText_Solid(font, name_text, textColor);
         if (textSurface == NULL) {
             printf("Failed to create text surface: %s\n", TTF_GetError());
@@ -44,7 +45,7 @@ void _DrawPlanets(SDL_Renderer* renderer, GameState* game_state) {
         SDL_Rect textRect;
         textRect.x = (int)(game_state->planets[i].position.x + game_state->planets[i].radius);
         textRect.y = (int)(game_state->planets[i].position.y - game_state->planets[i].radius);
-        textRect.w = textSurface->w * 2;  
+        textRect.w = textSurface->w * 2;
         textRect.h = textSurface->h * 2;
         SDL_FreeSurface(textSurface);
         SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
@@ -64,7 +65,7 @@ void _DrawTrash(SDL_Renderer* renderer, GameState* game_state) {
 
 void _DrawShips(SDL_Renderer* renderer, GameState* game_state) {
 
-        //load font for planet names
+    //load font for planet names
     TTF_Font* font = TTF_OpenFont("arial.ttf", 12);
     if (font == NULL) {
         printf("Failed to load font: %s\n", TTF_GetError());
@@ -77,7 +78,28 @@ void _DrawShips(SDL_Renderer* renderer, GameState* game_state) {
             //draw ship as a small green circle
         }
         
-        filledCircleRGBA(renderer, (int)game_state->ships[i].Position.x, (int)game_state->ships[i].Position.y, (int)game_state->ships[i].radius, 0, 255, 0, 255);
+
+        SDL_Rect dst; SDL_Point point;
+        dst.w = 100;
+        dst.h = 50;
+        dst.x = game_state->ships[i].Position.x - dst.w/2;
+        dst.y = game_state->ships[i].Position.y - dst.h/2;
+        
+        point.x = dst.w/2;
+        point.y = dst.h/2;
+
+        Direction dir = game_state->ships[i].direction;
+        
+        double angle = (dir == RIGHT)  ?   0   :
+                (dir == DOWN)   ?   90  :
+                (dir == LEFT)   ?   180 :
+                                    270 ;
+
+        //printf("%p\n", game_state->ships[i].imageTexture);
+
+        int status = SDL_RenderCopyEx(renderer, game_state->ships[i].imageTexture, NULL, &dst, angle, &point, SDL_FLIP_NONE);
+
+        //if(status == -1) printf("Status: %s\n", SDL_GetError());
 
         //draw ship name at top-right of ship
         //name is a single char + the amount of trash inside the ship
@@ -196,49 +218,80 @@ uint8_t checkKeyboard(int close){
     return msg;
 }
 
-SDL_Window *safe_SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint8 flags, gful_lifo **graceful_lifo){
-    SDL_Window *pWin = SDL_CreateWindow(title, x, y, w, h, flags);
-
-    if(!pWin){
-        printf("error initializing SDL: %s\n", SDL_GetError());
-        closeContexts(*graceful_lifo);
-        exit(1);
-    }
-    createContextDataforClosing(SDL_DestroyWindow, pWin, graceful_lifo);
-    return pWin;
+SDL_Texture *getTexture(SDL_Renderer *renderer, const char *file,  gful_lifo **graceful_lifo){
+    SDL_Surface *imageSurface= safe_IMG_Load(file, graceful_lifo);
+    SDL_Texture *imageTexture = safe_SDL_CreateTextureFromSurface(renderer, imageSurface, graceful_lifo);
+    closeSingleContext(graceful_lifo);
+    return imageTexture;
 }
 
-void safe_SDL_Init(Uint32 flags, gful_lifo **gracefull_lifo){
-    if(SDL_Init(flags) != 0){
-        printf("error initializing SDL: %s\n", SDL_GetError());
-        closeContexts(*gracefull_lifo);
-        exit(1);
-    }
-    createContextDataforClosing(SDL_Quit, NULL, gracefull_lifo);
-}
 
-void safe_TTF_Init(gful_lifo **graceful_lifo){
-    if (TTF_Init() != 0) {
-        printf("TTF_Init Error: %s\n", TTF_GetError());
-        closeContexts(*graceful_lifo);
-        exit(1);
-    }
-}
+    SDL_Window *safe_SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint8 flags, gful_lifo **graceful_lifo){
+        SDL_Window *pWin = SDL_CreateWindow(title, x, y, w, h, flags);
 
-SDL_Renderer *safe_SDL_CreateRenderer(  SDL_Window * window,
-                                        int index, Uint32 flags,
-                                        gful_lifo **graceful_lifo){
+        if(!pWin){
+            printf("error initializing SDL: %s\n", SDL_GetError());
+            closeContexts(*graceful_lifo);
+            exit(1);
+        }
+        createContextDataforClosing(SDL_DestroyWindow, pWin, graceful_lifo);
+        return pWin;
+    }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-                                 
-    if (renderer == NULL) {
-        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
-        closeContexts(*graceful_lifo);
-        exit(1);
+    void safe_SDL_Init(Uint32 flags, gful_lifo **gracefull_lifo){
+        if(SDL_Init(flags) != 0){
+            printf("error initializing SDL: %s\n", SDL_GetError());
+            closeContexts(*gracefull_lifo);
+            exit(1);
+        }
+        createContextDataforClosing(SDL_Quit, NULL, gracefull_lifo);
     }
-    createContextDataforClosing(SDL_DestroyRenderer, renderer, graceful_lifo);
-    return renderer;
+
+    void safe_TTF_Init(gful_lifo **graceful_lifo){
+        if (TTF_Init() != 0) {
+            printf("TTF_Init Error: %s\n", TTF_GetError());
+            closeContexts(*graceful_lifo);
+            exit(1);
+        }
     }
+
+    SDL_Renderer *safe_SDL_CreateRenderer(  SDL_Window * window,
+                                            int index, Uint32 flags,
+                                            gful_lifo **graceful_lifo){
+
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+                                    
+        if (renderer == NULL) {
+            printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
+            closeContexts(*graceful_lifo);
+            exit(1);
+        }
+        createContextDataforClosing(SDL_DestroyRenderer, renderer, graceful_lifo);
+        return renderer;
+    }
+
+    SDL_Surface *safe_IMG_Load(const char *file, gful_lifo **graceful_lifo){
+        SDL_Surface *imageSurface= IMG_Load(file);
+        if(imageSurface == NULL){
+            printf("Failed to open image file.\n");
+            closeContexts(*graceful_lifo);
+            exit(1);
+        }
+
+        createContextDataforClosing(SDL_FreeSurface, imageSurface, graceful_lifo);
+        return imageSurface;
+    }
+
+    SDL_Texture *safe_SDL_CreateTextureFromSurface(SDL_Renderer *renderer, SDL_Surface *SDLSurface, gful_lifo **graceful_lifo){
+        SDL_Texture *imageTexture = SDL_CreateTextureFromSurface(renderer, SDLSurface);
+        if(!imageTexture){
+            printf("Failed to create texture from Surface: %s\n", SDL_GetError());
+            closeContexts(*graceful_lifo);
+            exit(1);
+        }
+        return imageTexture;
+    }
+
 
 SDL_Window *createClientWindow(gful_lifo **gracefull_lifo){
     return safe_SDL_CreateWindow("ShipClient",

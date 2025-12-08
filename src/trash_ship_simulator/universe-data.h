@@ -3,6 +3,7 @@
 
 #include <libconfig.h>
 #include <stdint.h>
+#include <SDL2/SDL_image.h>
 
 //default values for universe objects
 #define PLANET_MASS 10
@@ -57,7 +58,8 @@ typedef struct Ship{
     Position Position;
     float radius;
     int current_trash;
-
+    SDL_Texture *imageTexture;
+    
     char planet_id;
     int is_active;
 }Ship;
