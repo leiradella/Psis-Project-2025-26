@@ -90,10 +90,10 @@ void _DrawShips(SDL_Renderer* renderer, GameState* game_state) {
 
         Direction dir = game_state->ships[i].direction;
         
-        double angle = (dir == RIGHT)  ?   0   :
-                (dir == DOWN)   ?   90  :
-                (dir == LEFT)   ?   180 :
-                                    270 ;
+        double angle =  (dir == RIGHT)  ?   0   :
+                        (dir == DOWN)   ?   90  :
+                        (dir == LEFT)   ?   180 :
+                                            270 ;
 
         //printf("%p\n", game_state->ships[i].imageTexture);
 
